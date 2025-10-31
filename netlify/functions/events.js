@@ -1,4 +1,6 @@
 // Netlify Function for managing events
+import { getStore } from '@netlify/blobs'
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -15,7 +17,8 @@ exports.handler = async (event, context) => {
     const { user } = context.clientContext || {}
     
     if (event.httpMethod === 'GET') {
-      const events = []
+      const store = getStore('chazonyosef')
+      const events = await store.get('events', { type: 'json' }) || []
 
       return {
         statusCode: 200,
@@ -34,6 +37,10 @@ exports.handler = async (event, context) => {
       }
 
       const data = event.body ? JSON.parse(event.body) : null
+      
+      // Save to Netlify Blobs
+      const store = getStore('chazonyosef')
+      await store.setJSON('events', data)
       
       return {
         statusCode: 200,

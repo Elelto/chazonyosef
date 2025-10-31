@@ -1,4 +1,31 @@
 // Netlify Function for managing prayer times
+import { getStore } from '@netlify/blobs'
+
+const defaultPrayerTimes = {
+  weekday: {
+    shacharit: ['6:30', '7:30', '8:15'],
+    mincha: ['13:30', '14:15'],
+    arvit: ['20:00', '21:00']
+  },
+  shabbat: {
+    friday: {
+      mincha: '18:30',
+      candleLighting: '19:15'
+    },
+    saturday: {
+      shacharit: '8:30',
+      mincha: '19:00',
+      arvit: '20:15',
+      shabbatEnds: '20:25'
+    }
+  },
+  special: [
+    { title: 'שיעור דף יומי', time: '6:00', days: 'כל יום' },
+    { title: 'שיעור הלכה', time: '20:30', days: 'א׳, ג׳, ה׳' },
+    { title: 'שיעור גמרא', time: '21:00', days: 'ב׳, ד׳' }
+  ]
+}
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -18,31 +45,9 @@ exports.handler = async (event, context) => {
     
     if (event.httpMethod === 'GET') {
       // Public endpoint - anyone can read
-      // In production, this would fetch from a database
-      const prayerTimes = {
-        weekday: {
-          shacharit: ['6:30', '7:30', '8:15'],
-          mincha: ['13:30', '14:15'],
-          arvit: ['20:00', '21:00']
-        },
-        shabbat: {
-          friday: {
-            mincha: '18:30',
-            candleLighting: '19:15'
-          },
-          saturday: {
-            shacharit: '8:30',
-            mincha: '19:00',
-            arvit: '20:15',
-            shabbatEnds: '20:25'
-          }
-        },
-        special: [
-          { title: 'שיעור דף יומי', time: '6:00', days: 'כל יום' },
-          { title: 'שיעור הלכה', time: '20:30', days: 'א׳, ג׳, ה׳' },
-          { title: 'שיעור גמרא', time: '21:00', days: 'ב׳, ד׳' }
-        ]
-      }
+      const store = getStore('chazonyosef')
+      const savedData = await store.get('prayer-times', { type: 'json' })
+      const prayerTimes = savedData || defaultPrayerTimes
 
       return {
         statusCode: 200,
@@ -63,8 +68,9 @@ exports.handler = async (event, context) => {
 
       const data = JSON.parse(event.body)
       
-      // In production, this would save to a database
-      // For now, we'll just return success
+      // Save to Netlify Blobs
+      const store = getStore('chazonyosef')
+      await store.setJSON('prayer-times', data)
       
       return {
         statusCode: 200,

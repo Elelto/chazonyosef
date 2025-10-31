@@ -1,4 +1,21 @@
 // Netlify Function for managing gallery images
+import { getStore } from '@netlify/blobs'
+
+const defaultImages = [
+  {
+    id: 1,
+    url: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=בית+המדרש',
+    title: 'בית המדרש מבפנים',
+    description: 'מבט כללי על בית המדרש'
+  },
+  {
+    id: 2,
+    url: 'https://via.placeholder.com/400x300/eab308/ffffff?text=ארון+הקודש',
+    title: 'ארון הקודש',
+    description: 'ארון הקודש המפואר'
+  }
+]
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -16,20 +33,9 @@ exports.handler = async (event, context) => {
     
     if (event.httpMethod === 'GET') {
       // Public endpoint
-      const images = [
-        {
-          id: 1,
-          url: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=בית+המדרש',
-          title: 'בית המדרש מבפנים',
-          description: 'מבט כללי על בית המדרש'
-        },
-        {
-          id: 2,
-          url: 'https://via.placeholder.com/400x300/eab308/ffffff?text=ארון+הקודש',
-          title: 'ארון הקודש',
-          description: 'ארון הקודש המפואר'
-        }
-      ]
+      const store = getStore('chazonyosef')
+      const savedData = await store.get('gallery', { type: 'json' })
+      const images = savedData || defaultImages
 
       return {
         statusCode: 200,
@@ -48,6 +54,10 @@ exports.handler = async (event, context) => {
       }
 
       const data = event.body ? JSON.parse(event.body) : null
+      
+      // Save to Netlify Blobs
+      const store = getStore('chazonyosef')
+      await store.setJSON('gallery', data)
       
       return {
         statusCode: 200,

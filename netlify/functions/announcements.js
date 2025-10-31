@@ -1,4 +1,6 @@
 // Netlify Function for managing announcements
+import { getStore } from '@netlify/blobs'
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -15,7 +17,8 @@ exports.handler = async (event, context) => {
     const { user } = context.clientContext || {}
     
     if (event.httpMethod === 'GET') {
-      const announcements = []
+      const store = getStore('chazonyosef')
+      const announcements = await store.get('announcements', { type: 'json' }) || []
 
       return {
         statusCode: 200,
@@ -34,6 +37,10 @@ exports.handler = async (event, context) => {
       }
 
       const data = event.body ? JSON.parse(event.body) : null
+      
+      // Save to Netlify Blobs
+      const store = getStore('chazonyosef')
+      await store.setJSON('announcements', data)
       
       return {
         statusCode: 200,
