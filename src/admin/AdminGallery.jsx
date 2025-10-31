@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Image, Upload, Trash2, Save } from 'lucide-react'
+import { Image, Plus, Trash2, Save } from 'lucide-react'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const AdminGallery = () => {
   const [images, setImages] = useState([])
@@ -13,22 +15,23 @@ const AdminGallery = () => {
 
   const loadImages = async () => {
     try {
-      console.log('📥 Loading gallery from server...')
-      const response = await fetch('/.netlify/functions/gallery')
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Gallery loaded:', data)
+      console.log('📥 Loading gallery from Firebase...')
+      const docRef = doc(db, 'settings', 'gallery')
+      const docSnap = await getDoc(docRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data().images || []
+        console.log('✅ Gallery loaded from Firebase:', data)
         setImages(data)
+        localStorage.setItem('gallery', JSON.stringify(data))
       } else {
-        console.warn('⚠️ Failed to load from server, trying localStorage')
-        const saved = localStorage.getItem('galleryImages')
-        if (saved) {
-          setImages(JSON.parse(saved))
-        }
+        const saved = localStorage.getItem('gallery')
+        if (saved) setImages(JSON.parse(saved))
       }
     } catch (error) {
       console.error('❌ Error loading gallery:', error)
-      setMessage('שגיאה בטעינת הגלריה')
+      const saved = localStorage.getItem('gallery')
+      if (saved) setImages(JSON.parse(saved))
     }
   }
 
@@ -61,34 +64,20 @@ const AdminGallery = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving gallery to server...', images)
+    console.log('💾 Saving gallery to Firebase...', images)
     
     try {
-      const response = await fetch('/.netlify/functions/gallery', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(images)
-      })
-
-      console.log('📡 Server response:', response.status, response.statusText)
-      const result = await response.json()
-      console.log('📦 Result:', result)
-
-      if (response.ok) {
-        localStorage.setItem('galleryImages', JSON.stringify(images))
-        setMessage('✅ הגלריה נשמרה בהצלחה בשרת!')
-        console.log('✅ Gallery saved successfully')
-      } else {
-        console.error('❌ Server error:', result)
-        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
-      }
+      const docRef = doc(db, 'settings', 'gallery')
+      await setDoc(docRef, { images })
+      
+      localStorage.setItem('gallery', JSON.stringify(images))
+      setMessage('✅ הגלריה נשמרה בהצלחה!')
+      console.log('✅ Gallery saved to Firebase successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       console.error('❌ Error saving gallery:', error)
-      setMessage('שגיאה בשמירת הגלריה - בדוק את החיבור לשרת')
+      setMessage('שגיאה בשמירת הגלריה: ' + error.message)
     } finally {
       setSaving(false)
     }

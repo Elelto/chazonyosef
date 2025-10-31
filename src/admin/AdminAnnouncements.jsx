@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { MessageSquare, Plus, Trash2, Save, Edit2 } from 'lucide-react'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([])
@@ -14,22 +16,23 @@ const AdminAnnouncements = () => {
 
   const loadAnnouncements = async () => {
     try {
-      console.log('📥 Loading announcements from server...')
-      const response = await fetch('/.netlify/functions/announcements')
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Announcements loaded:', data)
+      console.log('📥 Loading announcements from Firebase...')
+      const docRef = doc(db, 'settings', 'announcements')
+      const docSnap = await getDoc(docRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data().announcements || []
+        console.log('✅ Announcements loaded from Firebase:', data)
         setAnnouncements(data)
+        localStorage.setItem('announcements', JSON.stringify(data))
       } else {
-        console.warn('⚠️ Failed to load from server, trying localStorage')
         const saved = localStorage.getItem('announcements')
-        if (saved) {
-          setAnnouncements(JSON.parse(saved))
-        }
+        if (saved) setAnnouncements(JSON.parse(saved))
       }
     } catch (error) {
       console.error('❌ Error loading announcements:', error)
-      setMessage('שגיאה בטעינת ההודעות')
+      const saved = localStorage.getItem('announcements')
+      if (saved) setAnnouncements(JSON.parse(saved))
     }
   }
 
@@ -82,34 +85,20 @@ const AdminAnnouncements = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving announcements to server...', announcements)
+    console.log('💾 Saving announcements to Firebase...', announcements)
     
     try {
-      const response = await fetch('/.netlify/functions/announcements', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(announcements)
-      })
-
-      console.log('📡 Server response:', response.status, response.statusText)
-      const result = await response.json()
-      console.log('📦 Result:', result)
-
-      if (response.ok) {
-        localStorage.setItem('announcements', JSON.stringify(announcements))
-        setMessage('✅ ההודעות נשמרו בהצלחה בשרת!')
-        console.log('✅ Announcements saved successfully')
-      } else {
-        console.error('❌ Server error:', result)
-        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
-      }
+      const docRef = doc(db, 'settings', 'announcements')
+      await setDoc(docRef, { announcements })
+      
+      localStorage.setItem('announcements', JSON.stringify(announcements))
+      setMessage('✅ ההודעות נשמרו בהצלחה!')
+      console.log('✅ Announcements saved to Firebase successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       console.error('❌ Error saving announcements:', error)
-      setMessage('שגיאה בשמירת ההודעות - בדוק את החיבור לשרת')
+      setMessage('שגיאה בשמירת ההודעות: ' + error.message)
     } finally {
       setSaving(false)
     }

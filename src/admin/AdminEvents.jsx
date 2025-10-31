@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Plus, Trash2, Save, Edit2 } from 'lucide-react'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([])
@@ -20,14 +22,17 @@ const AdminEvents = () => {
 
   const loadEvents = async () => {
     try {
-      console.log('📥 Loading events from server...')
-      const response = await fetch('/.netlify/functions/events')
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Events loaded:', data)
+      console.log('📥 Loading events from Firebase...')
+      const docRef = doc(db, 'settings', 'events')
+      const docSnap = await getDoc(docRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data().events || []
+        console.log('✅ Events loaded from Firebase:', data)
         setEvents(data)
+        localStorage.setItem('events', JSON.stringify(data))
       } else {
-        console.warn('⚠️ Failed to load from server, trying localStorage')
+        console.log('📝 No events in Firebase')
         const saved = localStorage.getItem('events')
         if (saved) {
           setEvents(JSON.parse(saved))
@@ -35,7 +40,8 @@ const AdminEvents = () => {
       }
     } catch (error) {
       console.error('❌ Error loading events:', error)
-      setMessage('שגיאה בטעינת האירועים')
+      const saved = localStorage.getItem('events')
+      if (saved) setEvents(JSON.parse(saved))
     }
   }
 
@@ -87,36 +93,20 @@ const AdminEvents = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving events to server...', events)
+    console.log('💾 Saving events to Firebase...', events)
     
     try {
-      // Save to server
-      const response = await fetch('/.netlify/functions/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(events)
-      })
-
-      console.log('📡 Server response:', response.status, response.statusText)
-      const result = await response.json()
-      console.log('📦 Result:', result)
-
-      if (response.ok) {
-        // Also save to localStorage as backup
-        localStorage.setItem('events', JSON.stringify(events))
-        setMessage('✅ האירועים נשמרו בהצלחה בשרת!')
-        console.log('✅ Events saved successfully')
-      } else {
-        console.error('❌ Server error:', result)
-        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
-      }
+      const docRef = doc(db, 'settings', 'events')
+      await setDoc(docRef, { events })
+      
+      localStorage.setItem('events', JSON.stringify(events))
+      setMessage('✅ האירועים נשמרו בהצלחה!')
+      console.log('✅ Events saved to Firebase successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       console.error('❌ Error saving events:', error)
-      setMessage('שגיאה בשמירת האירועים - בדוק את החיבור לשרת')
+      setMessage('שגיאה בשמירת האירועים: ' + error.message)
     } finally {
       setSaving(false)
     }
