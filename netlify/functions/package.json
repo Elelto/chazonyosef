@@ -1,0 +1,9 @@
+{
+  "name": "chazonyosef-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Chazonyosef",
+  "type": "commonjs",
+  "dependencies": {
+    "@netlify/blobs": "^10.3.1"
+  }
+}

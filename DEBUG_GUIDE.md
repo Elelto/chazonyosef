@@ -80,12 +80,15 @@ netlify dev
 
 ## בעיות נפוצות ופתרונות
 
-### ❌ שגיאה: "500 Internal Server Error"
+### ❌ שגיאה: "500 Internal Server Error" או "502 Bad Gateway"
 **סיבה:** הפונקציות לא יכולות לטעון את @netlify/blobs
 **פתרון:**
 1. ודא שהפונקציות משתמשות ב-CommonJS (`require`) ולא ES6 (`import`)
-2. בדוק שה-package.json לא מכיל `"type": "module"` ברמת הפונקציות
-3. הרץ `npm install` שוב
+2. בדוק שיש `netlify/functions/package.json` עם `"type": "commonjs"`
+3. אם עדיין לא עובד, בדוק את לוגי Netlify Functions בדשבורד
+4. ודא ש-@netlify/blobs מותקן: `cd netlify/functions && npm install`
+
+**חשוב:** אחרי שינויים בפונקציות, Netlify צריך לבנות מחדש. זה קורה אוטומטית אחרי `git push`.
 
 ### ❌ שגיאה: "Unauthorized" (401)
 **סיבה:** המשתמש לא מחובר או Netlify Identity לא מוגדר כראוי
