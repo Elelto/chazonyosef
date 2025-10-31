@@ -32,7 +32,14 @@ const AdminPrayerTimes = () => {
   const loadPrayerTimes = async () => {
     try {
       console.log('📥 Loading prayer times from server...')
+      
+      // Check if user is logged in
+      const user = window.netlifyIdentity?.currentUser()
+      console.log('👤 Current user:', user?.email || 'Not logged in')
+      
       const response = await fetch('/.netlify/functions/prayer-times')
+      console.log('📡 Response status:', response.status, response.statusText)
+      
       if (response.ok) {
         const data = await response.json()
         console.log('✅ Prayer times loaded:', data)
@@ -82,11 +89,32 @@ const AdminPrayerTimes = () => {
     console.log('💾 Saving prayer times to server...', prayerTimes)
     
     try {
+      // Get current user and token
+      const user = window.netlifyIdentity?.currentUser()
+      const token = user?.token?.access_token
+      
+      console.log('🔑 Auth info:', {
+        hasUser: !!user,
+        email: user?.email,
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+      })
+
+      const headers = {
+        'Content-Type': 'application/json'
+      }
+
+      // Add authorization header if we have a token
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+        console.log('✅ Authorization header added')
+      } else {
+        console.warn('⚠️ No token found - request will be unauthorized')
+      }
+
       const response = await fetch('/.netlify/functions/prayer-times', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify(prayerTimes)
       })
 

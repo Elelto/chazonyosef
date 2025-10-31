@@ -1,5 +1,5 @@
 // Netlify Function for managing prayer times
-import { getStore } from '@netlify/blobs'
+const { getStore } = require('@netlify/blobs')
 
 const defaultPrayerTimes = {
   weekday: {
@@ -30,12 +30,14 @@ exports.handler = async (event, context) => {
   console.log('🔵 Prayer Times Function Called:', {
     method: event.httpMethod,
     path: event.path,
-    hasBody: !!event.body
+    hasBody: !!event.body,
+    hasContext: !!context,
+    hasClientContext: !!context?.clientContext
   })
 
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
     'Content-Type': 'application/json'
   }
@@ -48,8 +50,13 @@ exports.handler = async (event, context) => {
 
   try {
     // Check if user is authenticated
-    const { user } = context.clientContext || {}
-    console.log('👤 User authenticated:', !!user)
+    const user = context?.clientContext?.user || null
+    console.log('👤 User authenticated:', {
+      hasUser: !!user,
+      email: user?.email,
+      hasClientContext: !!context?.clientContext,
+      authHeader: event.headers?.authorization ? 'Present' : 'Missing'
+    })
     
     if (event.httpMethod === 'GET') {
       console.log('📖 GET request - fetching prayer times')

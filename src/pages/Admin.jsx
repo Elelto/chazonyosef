@@ -12,31 +12,61 @@ const Admin = () => {
   const location = useLocation()
 
   useEffect(() => {
+    console.log('🔐 Initializing Netlify Identity...')
+    
     // Initialize Netlify Identity
     if (window.netlifyIdentity) {
+      console.log('✅ Netlify Identity widget found')
+      
       window.netlifyIdentity.on('init', (user) => {
+        console.log('🔵 Identity initialized:', {
+          hasUser: !!user,
+          email: user?.email,
+          token: user?.token?.access_token ? 'Token exists' : 'No token',
+          tokenExpiry: user?.token?.expires_at
+        })
         setUser(user)
         setLoading(false)
       })
 
       window.netlifyIdentity.on('login', (user) => {
+        console.log('✅ User logged in:', {
+          email: user.email,
+          name: user.user_metadata?.full_name,
+          token: user.token?.access_token ? 'Token exists' : 'No token',
+          tokenType: user.token?.token_type,
+          expiresAt: user.token?.expires_at
+        })
         setUser(user)
         window.netlifyIdentity.close()
       })
 
       window.netlifyIdentity.on('logout', () => {
+        console.log('🚪 User logged out')
         setUser(null)
       })
+
+      window.netlifyIdentity.on('error', (err) => {
+        console.error('❌ Netlify Identity Error:', err)
+      })
+    } else {
+      console.error('❌ Netlify Identity widget not found!')
+      setLoading(false)
     }
   }, [])
 
   const handleLogin = () => {
+    console.log('🔓 Opening login modal...')
     if (window.netlifyIdentity) {
       window.netlifyIdentity.open()
+    } else {
+      console.error('❌ Netlify Identity not available')
+      alert('שגיאה: מערכת ההתחברות לא זמינה')
     }
   }
 
   const handleLogout = () => {
+    console.log('🚪 Logging out...')
     if (window.netlifyIdentity) {
       window.netlifyIdentity.logout()
     }

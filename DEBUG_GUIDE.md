@@ -80,12 +80,20 @@ netlify dev
 
 ## בעיות נפוצות ופתרונות
 
-### ❌ שגיאה: "Unauthorized"
-**סיבה:** המשתמש לא מחובר או Netlify Identity לא מוגדר
+### ❌ שגיאה: "500 Internal Server Error"
+**סיבה:** הפונקציות לא יכולות לטעון את @netlify/blobs
 **פתרון:**
-1. ודא ש-Netlify Identity מופעל באתר
+1. ודא שהפונקציות משתמשות ב-CommonJS (`require`) ולא ES6 (`import`)
+2. בדוק שה-package.json לא מכיל `"type": "module"` ברמת הפונקציות
+3. הרץ `npm install` שוב
+
+### ❌ שגיאה: "Unauthorized" (401)
+**סיבה:** המשתמש לא מחובר או Netlify Identity לא מוגדר כראוי
+**פתרון:**
+1. ודא ש-Netlify Identity מופעל באתר (Settings → Identity)
 2. התחבר דרך `/admin`
-3. בדוק שיש לך הרשאות אדמין
+3. בדוק בקונסול שיש טוקן: `window.netlifyIdentity.currentUser()?.token`
+4. ודא שהטוקן נשלח בכותרת Authorization
 
 ### ❌ שגיאה: "Failed to fetch"
 **סיבה:** הפונקציות לא רצות או יש בעיית CORS
@@ -107,6 +115,27 @@ netlify dev
 1. לחץ על כפתור "שמור שינויים"
 2. ודא שאתה רואה הודעה "נשמרו בהצלחה בשרת!"
 3. בדוק את הלוגים שהשמירה הצליחה
+
+## בדיקת אימות (Authentication)
+
+### בדוק שיש טוקן בדפדפן
+פתח את הקונסול והרץ:
+```javascript
+const user = window.netlifyIdentity.currentUser()
+console.log('User:', user?.email)
+console.log('Token:', user?.token?.access_token)
+console.log('Token expires:', new Date(user?.token?.expires_at))
+```
+
+אם אין טוקן או שהוא פג תוקף:
+```javascript
+window.netlifyIdentity.refresh()
+```
+
+### בדוק שהטוקן נשלח בבקשה
+בקונסול, לחץ על הבקשה ב-Network tab ובדוק:
+- Headers → Request Headers
+- צריך להיות: `Authorization: Bearer [token]`
 
 ## איך לראות לוגים ב-Production
 

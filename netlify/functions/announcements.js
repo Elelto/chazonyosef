@@ -1,5 +1,5 @@
 // Netlify Function for managing announcements
-import { getStore } from '@netlify/blobs'
+const { getStore } = require('@netlify/blobs')
 
 exports.handler = async (event, context) => {
   console.log('🔵 Announcements Function Called:', {
@@ -10,7 +10,7 @@ exports.handler = async (event, context) => {
 
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
     'Content-Type': 'application/json'
   }
@@ -21,8 +21,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { user } = context.clientContext || {}
-    console.log('👤 User authenticated:', !!user)
+    const user = context?.clientContext?.user || null
+    console.log('👤 User authenticated:', {
+      hasUser: !!user,
+      email: user?.email,
+      authHeader: event.headers?.authorization ? 'Present' : 'Missing'
+    })
     
     if (event.httpMethod === 'GET') {
       console.log('📖 GET request - fetching announcements')
