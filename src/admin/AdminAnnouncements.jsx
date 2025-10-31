@@ -12,10 +12,24 @@ const AdminAnnouncements = () => {
     loadAnnouncements()
   }, [])
 
-  const loadAnnouncements = () => {
-    const saved = localStorage.getItem('announcements')
-    if (saved) {
-      setAnnouncements(JSON.parse(saved))
+  const loadAnnouncements = async () => {
+    try {
+      console.log('📥 Loading announcements from server...')
+      const response = await fetch('/.netlify/functions/announcements')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Announcements loaded:', data)
+        setAnnouncements(data)
+      } else {
+        console.warn('⚠️ Failed to load from server, trying localStorage')
+        const saved = localStorage.getItem('announcements')
+        if (saved) {
+          setAnnouncements(JSON.parse(saved))
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error loading announcements:', error)
+      setMessage('שגיאה בטעינת ההודעות')
     }
   }
 
@@ -68,13 +82,34 @@ const AdminAnnouncements = () => {
 
   const handleSave = async () => {
     setSaving(true)
+    console.log('💾 Saving announcements to server...', announcements)
+    
     try {
-      localStorage.setItem('announcements', JSON.stringify(announcements))
-      setMessage('ההודעות נשמרו בהצלחה!')
+      const response = await fetch('/.netlify/functions/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(announcements)
+      })
+
+      console.log('📡 Server response:', response.status, response.statusText)
+      const result = await response.json()
+      console.log('📦 Result:', result)
+
+      if (response.ok) {
+        localStorage.setItem('announcements', JSON.stringify(announcements))
+        setMessage('✅ ההודעות נשמרו בהצלחה בשרת!')
+        console.log('✅ Announcements saved successfully')
+      } else {
+        console.error('❌ Server error:', result)
+        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
+      }
+      
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      console.error('Error saving:', error)
-      setMessage('שגיאה בשמירת ההודעות')
+      console.error('❌ Error saving announcements:', error)
+      setMessage('שגיאה בשמירת ההודעות - בדוק את החיבור לשרת')
     } finally {
       setSaving(false)
     }

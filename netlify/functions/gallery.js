@@ -17,6 +17,12 @@ const defaultImages = [
 ]
 
 exports.handler = async (event, context) => {
+  console.log('🔵 Gallery Function Called:', {
+    method: event.httpMethod,
+    path: event.path,
+    hasBody: !!event.body
+  })
+
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -25,17 +31,20 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod === 'OPTIONS') {
+    console.log('✅ OPTIONS request handled')
     return { statusCode: 200, headers, body: '' }
   }
 
   try {
     const { user } = context.clientContext || {}
+    console.log('👤 User authenticated:', !!user)
     
     if (event.httpMethod === 'GET') {
-      // Public endpoint
+      console.log('📖 GET request - fetching gallery')
       const store = getStore('chazonyosef')
       const savedData = await store.get('gallery', { type: 'json' })
       const images = savedData || defaultImages
+      console.log('✅ Gallery fetched:', images.length, 'items', savedData ? '(from store)' : '(default)')
 
       return {
         statusCode: 200,
@@ -45,7 +54,10 @@ exports.handler = async (event, context) => {
     }
 
     if (event.httpMethod === 'POST' || event.httpMethod === 'PUT' || event.httpMethod === 'DELETE') {
+      console.log('💾 Write request received')
+      
       if (!user) {
+        console.log('❌ Unauthorized - no user found')
         return {
           statusCode: 401,
           headers,
@@ -54,10 +66,12 @@ exports.handler = async (event, context) => {
       }
 
       const data = event.body ? JSON.parse(event.body) : null
+      console.log('📝 Data to save:', { itemCount: Array.isArray(data) ? data.length : 'not array' })
       
       // Save to Netlify Blobs
       const store = getStore('chazonyosef')
       await store.setJSON('gallery', data)
+      console.log('✅ Gallery saved successfully to Netlify Blobs')
       
       return {
         statusCode: 200,
@@ -76,11 +90,17 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('Error:', error)
+    console.error('❌ ERROR in gallery function:', {
+      message: error.message,
+      stack: error.stack
+    })
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      })
     }
   }
 }

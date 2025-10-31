@@ -23,6 +23,34 @@ const AdminPrayerTimes = () => {
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadPrayerTimes()
+  }, [])
+
+  const loadPrayerTimes = async () => {
+    try {
+      console.log('📥 Loading prayer times from server...')
+      const response = await fetch('/.netlify/functions/prayer-times')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Prayer times loaded:', data)
+        setPrayerTimes(data)
+      } else {
+        console.warn('⚠️ Failed to load from server, trying localStorage')
+        const saved = localStorage.getItem('prayerTimes')
+        if (saved) {
+          setPrayerTimes(JSON.parse(saved))
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error loading prayer times:', error)
+      setMessage('שגיאה בטעינת זמני התפילות')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleWeekdayTimeChange = (prayer, index, value) => {
     const newTimes = { ...prayerTimes }
@@ -51,17 +79,34 @@ const AdminPrayerTimes = () => {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
+    console.log('💾 Saving prayer times to server...', prayerTimes)
     
     try {
-      // This will be replaced with actual Netlify Function call
-      // For now, just simulate saving to localStorage
-      localStorage.setItem('prayerTimes', JSON.stringify(prayerTimes))
+      const response = await fetch('/.netlify/functions/prayer-times', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(prayerTimes)
+      })
+
+      console.log('📡 Server response:', response.status, response.statusText)
+      const result = await response.json()
+      console.log('📦 Result:', result)
+
+      if (response.ok) {
+        localStorage.setItem('prayerTimes', JSON.stringify(prayerTimes))
+        setMessage('✅ הזמנים נשמרו בהצלחה בשרת!')
+        console.log('✅ Prayer times saved successfully')
+      } else {
+        console.error('❌ Server error:', result)
+        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
+      }
       
-      setMessage('הזמנים נשמרו בהצלחה!')
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      console.error('Error saving:', error)
-      setMessage('שגיאה בשמירת הזמנים')
+      console.error('❌ Error saving prayer times:', error)
+      setMessage('שגיאה בשמירת הזמנים - בדוק את החיבור לשרת')
     } finally {
       setSaving(false)
     }

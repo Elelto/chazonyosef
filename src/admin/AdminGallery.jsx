@@ -11,11 +11,24 @@ const AdminGallery = () => {
     loadImages()
   }, [])
 
-  const loadImages = () => {
-    // Load from localStorage for now
-    const saved = localStorage.getItem('galleryImages')
-    if (saved) {
-      setImages(JSON.parse(saved))
+  const loadImages = async () => {
+    try {
+      console.log('📥 Loading gallery from server...')
+      const response = await fetch('/.netlify/functions/gallery')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Gallery loaded:', data)
+        setImages(data)
+      } else {
+        console.warn('⚠️ Failed to load from server, trying localStorage')
+        const saved = localStorage.getItem('galleryImages')
+        if (saved) {
+          setImages(JSON.parse(saved))
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error loading gallery:', error)
+      setMessage('שגיאה בטעינת הגלריה')
     }
   }
 
@@ -48,14 +61,34 @@ const AdminGallery = () => {
 
   const handleSave = async () => {
     setSaving(true)
+    console.log('💾 Saving gallery to server...', images)
+    
     try {
-      // Save to localStorage for now
-      localStorage.setItem('galleryImages', JSON.stringify(images))
-      setMessage('הגלריה נשמרה בהצלחה!')
+      const response = await fetch('/.netlify/functions/gallery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(images)
+      })
+
+      console.log('📡 Server response:', response.status, response.statusText)
+      const result = await response.json()
+      console.log('📦 Result:', result)
+
+      if (response.ok) {
+        localStorage.setItem('galleryImages', JSON.stringify(images))
+        setMessage('✅ הגלריה נשמרה בהצלחה בשרת!')
+        console.log('✅ Gallery saved successfully')
+      } else {
+        console.error('❌ Server error:', result)
+        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
+      }
+      
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      console.error('Error saving:', error)
-      setMessage('שגיאה בשמירת הגלריה')
+      console.error('❌ Error saving gallery:', error)
+      setMessage('שגיאה בשמירת הגלריה - בדוק את החיבור לשרת')
     } finally {
       setSaving(false)
     }

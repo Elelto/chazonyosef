@@ -18,10 +18,24 @@ const AdminEvents = () => {
     loadEvents()
   }, [])
 
-  const loadEvents = () => {
-    const saved = localStorage.getItem('events')
-    if (saved) {
-      setEvents(JSON.parse(saved))
+  const loadEvents = async () => {
+    try {
+      console.log('📥 Loading events from server...')
+      const response = await fetch('/.netlify/functions/events')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Events loaded:', data)
+        setEvents(data)
+      } else {
+        console.warn('⚠️ Failed to load from server, trying localStorage')
+        const saved = localStorage.getItem('events')
+        if (saved) {
+          setEvents(JSON.parse(saved))
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error loading events:', error)
+      setMessage('שגיאה בטעינת האירועים')
     }
   }
 
@@ -73,13 +87,36 @@ const AdminEvents = () => {
 
   const handleSave = async () => {
     setSaving(true)
+    console.log('💾 Saving events to server...', events)
+    
     try {
-      localStorage.setItem('events', JSON.stringify(events))
-      setMessage('האירועים נשמרו בהצלחה!')
+      // Save to server
+      const response = await fetch('/.netlify/functions/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(events)
+      })
+
+      console.log('📡 Server response:', response.status, response.statusText)
+      const result = await response.json()
+      console.log('📦 Result:', result)
+
+      if (response.ok) {
+        // Also save to localStorage as backup
+        localStorage.setItem('events', JSON.stringify(events))
+        setMessage('✅ האירועים נשמרו בהצלחה בשרת!')
+        console.log('✅ Events saved successfully')
+      } else {
+        console.error('❌ Server error:', result)
+        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
+      }
+      
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
-      console.error('Error saving:', error)
-      setMessage('שגיאה בשמירת האירועים')
+      console.error('❌ Error saving events:', error)
+      setMessage('שגיאה בשמירת האירועים - בדוק את החיבור לשרת')
     } finally {
       setSaving(false)
     }

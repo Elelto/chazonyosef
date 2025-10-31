@@ -27,6 +27,12 @@ const defaultPrayerTimes = {
 }
 
 exports.handler = async (event, context) => {
+  console.log('🔵 Prayer Times Function Called:', {
+    method: event.httpMethod,
+    path: event.path,
+    hasBody: !!event.body
+  })
+
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -36,18 +42,21 @@ exports.handler = async (event, context) => {
 
   // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
+    console.log('✅ OPTIONS request handled')
     return { statusCode: 200, headers, body: '' }
   }
 
   try {
     // Check if user is authenticated
     const { user } = context.clientContext || {}
+    console.log('👤 User authenticated:', !!user)
     
     if (event.httpMethod === 'GET') {
-      // Public endpoint - anyone can read
+      console.log('📖 GET request - fetching prayer times')
       const store = getStore('chazonyosef')
       const savedData = await store.get('prayer-times', { type: 'json' })
       const prayerTimes = savedData || defaultPrayerTimes
+      console.log('✅ Prayer times fetched:', savedData ? '(from store)' : '(default)')
 
       return {
         statusCode: 200,
@@ -57,8 +66,11 @@ exports.handler = async (event, context) => {
     }
 
     if (event.httpMethod === 'POST' || event.httpMethod === 'PUT') {
+      console.log('💾 Write request received')
+      
       // Protected endpoint - only authenticated users can write
       if (!user) {
+        console.log('❌ Unauthorized - no user found')
         return {
           statusCode: 401,
           headers,
@@ -67,10 +79,12 @@ exports.handler = async (event, context) => {
       }
 
       const data = JSON.parse(event.body)
+      console.log('📝 Data to save:', data)
       
       // Save to Netlify Blobs
       const store = getStore('chazonyosef')
       await store.setJSON('prayer-times', data)
+      console.log('✅ Prayer times saved successfully to Netlify Blobs')
       
       return {
         statusCode: 200,
@@ -89,11 +103,17 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('Error:', error)
+    console.error('❌ ERROR in prayer-times function:', {
+      message: error.message,
+      stack: error.stack
+    })
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      })
     }
   }
 }
