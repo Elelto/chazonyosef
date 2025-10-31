@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Clock, Save, Plus, Trash2 } from 'lucide-react'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const AdminPrayerTimes = () => {
   const [prayerTimes, setPrayerTimes] = useState({
@@ -31,29 +33,34 @@ const AdminPrayerTimes = () => {
 
   const loadPrayerTimes = async () => {
     try {
-      console.log('📥 Loading prayer times from server...')
+      console.log('📥 Loading prayer times from Firebase...')
       
-      // Check if user is logged in
-      const user = window.netlifyIdentity?.currentUser()
-      console.log('👤 Current user:', user?.email || 'Not logged in')
+      const docRef = doc(db, 'settings', 'prayerTimes')
+      const docSnap = await getDoc(docRef)
       
-      const response = await fetch('/.netlify/functions/prayer-times')
-      console.log('📡 Response status:', response.status, response.statusText)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Prayer times loaded:', data)
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        console.log('✅ Prayer times loaded from Firebase:', data)
         setPrayerTimes(data)
+        // Backup to localStorage
+        localStorage.setItem('prayerTimes', JSON.stringify(data))
       } else {
-        console.warn('⚠️ Failed to load from server, trying localStorage')
+        console.log('📝 No data in Firebase, using defaults')
+        // Try localStorage as fallback
         const saved = localStorage.getItem('prayerTimes')
         if (saved) {
+          console.log('📦 Loaded from localStorage')
           setPrayerTimes(JSON.parse(saved))
         }
       }
     } catch (error) {
       console.error('❌ Error loading prayer times:', error)
       setMessage('שגיאה בטעינת זמני התפילות')
+      // Try localStorage as fallback
+      const saved = localStorage.getItem('prayerTimes')
+      if (saved) {
+        setPrayerTimes(JSON.parse(saved))
+      }
     } finally {
       setLoading(false)
     }
@@ -86,55 +93,22 @@ const AdminPrayerTimes = () => {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
-    console.log('💾 Saving prayer times to server...', prayerTimes)
+    console.log('💾 Saving prayer times to Firebase...', prayerTimes)
     
     try {
-      // Get current user and token
-      const user = window.netlifyIdentity?.currentUser()
-      const token = user?.token?.access_token
+      const docRef = doc(db, 'settings', 'prayerTimes')
+      await setDoc(docRef, prayerTimes)
       
-      console.log('🔑 Auth info:', {
-        hasUser: !!user,
-        email: user?.email,
-        hasToken: !!token,
-        tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
-      })
-
-      const headers = {
-        'Content-Type': 'application/json'
-      }
-
-      // Add authorization header if we have a token
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-        console.log('✅ Authorization header added')
-      } else {
-        console.warn('⚠️ No token found - request will be unauthorized')
-      }
-
-      const response = await fetch('/.netlify/functions/prayer-times', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(prayerTimes)
-      })
-
-      console.log('📡 Server response:', response.status, response.statusText)
-      const result = await response.json()
-      console.log('📦 Result:', result)
-
-      if (response.ok) {
-        localStorage.setItem('prayerTimes', JSON.stringify(prayerTimes))
-        setMessage('✅ הזמנים נשמרו בהצלחה בשרת!')
-        console.log('✅ Prayer times saved successfully')
-      } else {
-        console.error('❌ Server error:', result)
-        setMessage(`שגיאה: ${result.error || 'לא ניתן לשמור'}`)
-      }
+      // Backup to localStorage
+      localStorage.setItem('prayerTimes', JSON.stringify(prayerTimes))
+      
+      setMessage('✅ הזמנים נשמרו בהצלחה!')
+      console.log('✅ Prayer times saved to Firebase successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       console.error('❌ Error saving prayer times:', error)
-      setMessage('שגיאה בשמירת הזמנים - בדוק את החיבור לשרת')
+      setMessage('שגיאה בשמירת הזמנים: ' + error.message)
     } finally {
       setSaving(false)
     }
