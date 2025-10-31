@@ -4,7 +4,7 @@ import { Clock, Save, Plus, Trash2 } from 'lucide-react'
 const AdminPrayerTimes = () => {
   const [prayerTimes, setPrayerTimes] = useState({
     weekday: {
-      shacharit: ['6:30', '7:30', '8:15'],
+      shacharit: ['06:30', '07:30', '08:15'],
       mincha: ['13:30', '14:15'],
       arvit: ['20:00', '21:00']
     },
@@ -14,7 +14,7 @@ const AdminPrayerTimes = () => {
         candleLighting: '19:15'
       },
       saturday: {
-        shacharit: '8:30',
+        shacharit: '08:30',
         mincha: '19:00',
         arvit: '20:15',
         shabbatEnds: '20:25'
