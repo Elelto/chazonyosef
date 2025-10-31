@@ -6,6 +6,18 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@netlify/blobs"]
+  
+[[functions.prayer-times]]
+  node_bundler = "esbuild"
+  
+[[functions.events]]
+  node_bundler = "esbuild"
+  
+[[functions.announcements]]
+  node_bundler = "esbuild"
+  
+[[functions.gallery]]
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/*"
