@@ -14,3 +14,4 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NETLIFY_BLOBS_CONTEXT = "production"
