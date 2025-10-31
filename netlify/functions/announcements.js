@@ -1,7 +1,7 @@
 // Netlify Function for managing announcements
-const { getStore } = require('@netlify/blobs')
+import { getStore } from '@netlify/blobs'
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   console.log('🔵 Announcements Function Called:', {
     method: event.httpMethod,
     path: event.path,

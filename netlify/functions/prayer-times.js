@@ -1,5 +1,5 @@
 // Netlify Function for managing prayer times
-const { getStore } = require('@netlify/blobs')
+import { getStore } from '@netlify/blobs'
 
 const defaultPrayerTimes = {
   weekday: {
@@ -26,7 +26,7 @@ const defaultPrayerTimes = {
   ]
 }
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   console.log('🔵 Prayer Times Function Called:', {
     method: event.httpMethod,
     path: event.path,

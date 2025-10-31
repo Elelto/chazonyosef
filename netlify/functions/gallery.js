@@ -1,5 +1,5 @@
 // Netlify Function for managing gallery images
-const { getStore } = require('@netlify/blobs')
+import { getStore } from '@netlify/blobs'
 
 const defaultImages = [
   {
@@ -16,7 +16,7 @@ const defaultImages = [
   }
 ]
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   console.log('🔵 Gallery Function Called:', {
     method: event.httpMethod,
     path: event.path,

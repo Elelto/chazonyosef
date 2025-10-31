@@ -1,7 +1,7 @@
 // Netlify Function for managing events
-const { getStore } = require('@netlify/blobs')
+import { getStore } from '@netlify/blobs'
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   console.log('🔵 Events Function Called:', {
     method: event.httpMethod,
     path: event.path,
