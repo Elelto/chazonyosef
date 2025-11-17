@@ -4,6 +4,7 @@
   "description": "Netlify Functions for Chazonyosef",
   "type": "module",
   "dependencies": {
-    "@netlify/blobs": "^8.1.0"
+    "@netlify/blobs": "^8.1.0",
+    "firebase-admin": "^12.0.0"
   }
 }
