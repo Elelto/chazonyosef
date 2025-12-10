@@ -1,7 +1,50 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Clock, Image, Mail, Phone, BookOpen, Users, Heart } from 'lucide-react'
+import { fetchFromFirebase } from '../utils/api'
 
 const Home = () => {
+  const [content, setContent] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  const loadContent = async () => {
+    try {
+      const data = await fetchFromFirebase('firebase-site-content')
+      if (data.content) {
+        setContent(data.content)
+      }
+    } catch (error) {
+      console.error('Error loading site content:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Icon mapping
+  const getIcon = (iconName) => {
+    const icons = {
+      clock: Clock,
+      book: BookOpen,
+      users: Users,
+      heart: Heart,
+      image: Image,
+      mail: Mail
+    }
+    return icons[iconName] || Clock
+  }
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="spinner"></div>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* Hero Section */}
@@ -18,13 +61,13 @@ const Home = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-800">
-              בית המדרש "חזון יוסף"
+              {content.hero.title}
             </h1>
             <p className="text-xl md:text-2xl mb-2 text-slate-700">
-              שיכון ג' והסביבה
+              {content.hero.subtitle}
             </p>
             <p className="text-base md:text-lg text-slate-600 mb-12">
-              בעל התניא 26, בני ברק
+              {content.hero.address}
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/prayer-times" className="bg-indigo-900 hover:bg-indigo-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
@@ -43,16 +86,13 @@ const Home = () => {
       {/* About Section */}
       <section className="py-20 bg-slate-50 border-b border-slate-200">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">אודות בית המדרש</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.about.title}</h2>
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <p className="text-lg text-slate-700 leading-relaxed">
-              בית המדרש "חזון יוסף" משמש כמרכז רוחני לקהילת שיכון ג' והסביבה בבני ברק.
-              אנו מציעים תפילות במניינים קבועים, שיעורי תורה מגוונים, ואווירה חמה ומזמינה
-              לכל המבקשים להתקרב לתורה ולעבודת ה'.
+              {content.about.paragraph1}
             </p>
             <p className="text-lg text-slate-700 leading-relaxed">
-              בית המדרש נקרא על שם הרב יוסף זצ"ל, ומשמש כמקום מפגש לתלמידי חכמים,
-              אברכים ובעלי בתים המבקשים לעסוק בתורה ובתפילה באווירה של קדושה ויראת שמים.
+              {content.about.paragraph2}
             </p>
           </div>
         </div>
@@ -61,91 +101,33 @@ const Home = () => {
       {/* Features Section */}
       <section className="py-20 bg-gradient-to-b from-slate-50 to-indigo-50/20">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">מה אנו מציעים</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.features.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="card text-center border-r-4 border-indigo-600 hover:shadow-lg hover:shadow-indigo-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-indigo-100 flex items-center justify-center mx-auto rounded-lg">
-                  <Clock className="text-indigo-700" size={32} />
+            {content.features.items.map((item, index) => {
+              const Icon = getIcon(item.icon)
+              const isIndigo = index % 2 === 0
+              return (
+                <div key={item.id} className={isIndigo 
+                  ? 'card text-center border-r-4 border-indigo-600 hover:shadow-lg hover:shadow-indigo-100 transition-all'
+                  : 'card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all'
+                }>
+                  <div className="mb-6">
+                    <div className={isIndigo 
+                      ? 'w-16 h-16 bg-indigo-100 flex items-center justify-center mx-auto rounded-lg'
+                      : 'w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg'
+                    }>
+                      <Icon className={isIndigo ? 'text-indigo-700' : 'text-teal-700'} size={32} />
+                    </div>
+                  </div>
+                  <h3 className={isIndigo ? 'text-xl font-bold mb-3 text-indigo-900' : 'text-xl font-bold mb-3 text-teal-900'}>
+                    {item.title}
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-indigo-900">
-                תפילות במניין
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                מניינים קבועים לשחרית, מנחה וערבית בזמנים נוחים לכל הציבור
-              </p>
-            </div>
-
-            <div className="card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg">
-                  <BookOpen className="text-teal-700" size={32} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-teal-900">
-                שיעורי תורה
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                שיעורים מגוונים בגמרא, הלכה, מוסר ומחשבה על ידי מגידי שיעורים מובילים
-              </p>
-            </div>
-
-            <div className="card text-center border-r-4 border-indigo-600 hover:shadow-lg hover:shadow-indigo-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-indigo-100 flex items-center justify-center mx-auto rounded-lg">
-                  <Users className="text-indigo-700" size={32} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-indigo-900">
-                קהילה חמה
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                אווירה משפחתית ומזמינה, קהילה תומכת ומגובשת של אנשים יראי שמים
-              </p>
-            </div>
-
-            <div className="card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg">
-                  <Heart className="text-teal-700" size={32} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-teal-900">
-                אירועים מיוחדים
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                סיומי מסכת, מסיבות מצווה, וערבי עיון מיוחדים לחגים ומועדים
-              </p>
-            </div>
-
-            <div className="card text-center border-r-4 border-indigo-600 hover:shadow-lg hover:shadow-indigo-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-indigo-100 flex items-center justify-center mx-auto rounded-lg">
-                  <Image className="text-indigo-700" size={32} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-indigo-900">
-                מתקנים מודרניים
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                בית מדרש מרווח ומאובזר, ספריית קודש עשירה, ומערכת הגברה איכותית
-              </p>
-            </div>
-
-            <div className="card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg">
-                  <Mail className="text-teal-700" size={32} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-teal-900">
-                עדכונים שוטפים
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                הצטרפו לרשימת התפוצה שלנו לקבלת עדכונים על שיעורים, אירועים וזמני תפילה
-              </p>
-            </div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -154,11 +136,10 @@ const Home = () => {
       <section className="py-20 bg-indigo-50 border-b border-slate-200">
         <div className="container-custom text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-indigo-900">
-            הצטרפו אלינו
+            {content.cta.title}
           </h2>
           <p className="text-lg mb-10 max-w-2xl mx-auto text-slate-600">
-            אנו מזמינים אתכם להצטרף לקהילה שלנו, להשתתף בתפילות ובשיעורים,
-            ולהיות חלק ממשפחת "חזון יוסף"
+            {content.cta.description}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/newsletter" className="bg-indigo-900 hover:bg-indigo-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
@@ -179,7 +160,7 @@ const Home = () => {
       {/* Quick Links */}
       <section className="py-20 bg-gradient-to-b from-indigo-50/20 to-slate-50">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">גישה מהירה</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.quickLinks.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               to="/prayer-times"

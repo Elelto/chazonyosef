@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { LogOut, Clock, Image, MessageSquare, Calendar, Settings } from 'lucide-react'
+import { LogOut, Clock, Image, MessageSquare, Calendar, FileText } from 'lucide-react'
 import AdminPrayerTimes from '../admin/AdminPrayerTimes'
 import AdminGallery from '../admin/AdminGallery'
 import AdminAnnouncements from '../admin/AdminAnnouncements'
 import AdminEvents from '../admin/AdminEvents'
+import AdminSiteContent from '../admin/AdminSiteContent'
 
 const Admin = () => {
   const [user, setUser] = useState(null)
@@ -136,6 +137,7 @@ const Admin = () => {
   }
 
   const navItems = [
+    { path: '/admin/site-content', label: 'תוכן האתר', icon: FileText },
     { path: '/admin/prayer-times', label: 'זמני תפילות', icon: Clock },
     { path: '/admin/gallery', label: 'גלריה', icon: Image },
     { path: '/admin/announcements', label: 'הודעות', icon: MessageSquare },
@@ -198,7 +200,8 @@ const Admin = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Routes>
-              <Route index element={<Navigate to="/admin/prayer-times" replace />} />
+              <Route index element={<Navigate to="/admin/site-content" replace />} />
+              <Route path="site-content" element={<AdminSiteContent />} />
               <Route path="prayer-times" element={<AdminPrayerTimes />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="announcements" element={<AdminAnnouncements />} />
