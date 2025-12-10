@@ -11,37 +11,25 @@ const PrayerTimes = () => {
 
   const fetchPrayerTimes = async () => {
     try {
-      // This will be replaced with actual Netlify Function call
-      // For now, using default data
-      const defaultTimes = {
-        weekday: {
-          shacharit: ['6:30', '7:30', '8:15'],
-          mincha: ['13:30', '14:15'],
-          arvit: ['20:00', '21:00']
-        },
-        shabbat: {
-          friday: {
-            mincha: '18:30',
-            candleLighting: '19:15'
-          },
-          saturday: {
-            shacharit: '8:30',
-            mincha: '19:00',
-            arvit: '20:15',
-            shabbatEnds: '20:25'
-          }
-        },
-        special: [
-          { title: 'שיעור דף יומי', time: '6:00', days: 'כל יום' },
-          { title: 'שיעור הלכה', time: '20:30', days: 'א׳, ג׳, ה׳' },
-          { title: 'שיעור גמרא', time: '21:00', days: 'ב׳, ד׳' }
-        ]
+      console.log('📥 Fetching prayer times from Netlify Function...')
+      const response = await fetch('/.netlify/functions/firebase-prayer-times')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch prayer times')
       }
       
-      setPrayerTimes(defaultTimes)
+      const data = await response.json()
+      console.log('✅ Prayer times loaded:', data)
+      setPrayerTimes(data)
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching prayer times:', error)
+      console.error('❌ Error fetching prayer times:', error)
+      // Fallback to localStorage if available
+      const saved = localStorage.getItem('prayerTimes')
+      if (saved) {
+        console.log('📦 Using cached prayer times')
+        setPrayerTimes(JSON.parse(saved))
+      }
       setLoading(false)
     }
   }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Plus, Trash2, Save, Edit2 } from 'lucide-react'
-import { db } from '../firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([])
@@ -22,26 +21,19 @@ const AdminEvents = () => {
 
   const loadEvents = async () => {
     try {
-      console.log('📥 Loading events from Firebase...')
-      const docRef = doc(db, 'settings', 'events')
-      const docSnap = await getDoc(docRef)
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data().events || []
-        console.log('✅ Events loaded from Firebase:', data)
-        setEvents(data)
-        localStorage.setItem('events', JSON.stringify(data))
-      } else {
-        console.log('📝 No events in Firebase')
-        const saved = localStorage.getItem('events')
-        if (saved) {
-          setEvents(JSON.parse(saved))
-        }
-      }
+      console.log('📥 Loading events via Netlify Function...')
+      const data = await fetchFromFirebase('firebase-events')
+      const events = data.events || []
+      console.log('✅ Events loaded:', events)
+      setEvents(events)
+      localStorage.setItem('events', JSON.stringify(events))
     } catch (error) {
       console.error('❌ Error loading events:', error)
       const saved = localStorage.getItem('events')
-      if (saved) setEvents(JSON.parse(saved))
+      if (saved) {
+        console.log('📦 Loaded from localStorage fallback')
+        setEvents(JSON.parse(saved))
+      }
     }
   }
 
@@ -93,15 +85,14 @@ const AdminEvents = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving events to Firebase...', events)
+    console.log('💾 Saving events via Netlify Function...', events)
     
     try {
-      const docRef = doc(db, 'settings', 'events')
-      await setDoc(docRef, { events })
+      await saveToFirebase('firebase-events', { events })
       
       localStorage.setItem('events', JSON.stringify(events))
       setMessage('✅ האירועים נשמרו בהצלחה!')
-      console.log('✅ Events saved to Firebase successfully')
+      console.log('✅ Events saved successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {

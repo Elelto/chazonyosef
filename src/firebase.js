@@ -2,6 +2,8 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 
+// Firebase Web API Key - safe for public use
+// This key is automatically restricted to Firebase-related APIs only
 const firebaseConfig = {
   apiKey: "AIzaSyCahm3Mr6eM4j0XACPDexiHCI7fq0wlI_E",
   authDomain: "chazon-e3dc4.firebaseapp.com",

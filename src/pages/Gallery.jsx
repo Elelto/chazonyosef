@@ -12,51 +12,26 @@ const Gallery = () => {
 
   const fetchImages = async () => {
     try {
-      // This will be replaced with actual Netlify Function call
-      // For now, using placeholder data
-      const placeholderImages = [
-        {
-          id: 1,
-          url: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=בית+המדרש',
-          title: 'בית המדרש מבפנים',
-          description: 'מבט כללי על בית המדרש'
-        },
-        {
-          id: 2,
-          url: 'https://via.placeholder.com/400x300/eab308/ffffff?text=ארון+הקודש',
-          title: 'ארון הקודש',
-          description: 'ארון הקודש המפואר'
-        },
-        {
-          id: 3,
-          url: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=שיעור+תורה',
-          title: 'שיעור תורה',
-          description: 'שיעור תורה בבית המדרש'
-        },
-        {
-          id: 4,
-          url: 'https://via.placeholder.com/400x300/eab308/ffffff?text=סיום+מסכת',
-          title: 'סיום מסכת',
-          description: 'חגיגת סיום מסכת'
-        },
-        {
-          id: 5,
-          url: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=תפילה+במניין',
-          title: 'תפילה במניין',
-          description: 'תפילת שחרית במניין'
-        },
-        {
-          id: 6,
-          url: 'https://via.placeholder.com/400x300/eab308/ffffff?text=ספריית+קודש',
-          title: 'ספריית הקודש',
-          description: 'ספריית הקודש העשירה'
-        }
-      ]
+      console.log('📥 Fetching gallery from Netlify Function...')
+      const response = await fetch('/.netlify/functions/firebase-gallery')
       
-      setImages(placeholderImages)
+      if (!response.ok) {
+        throw new Error('Failed to fetch gallery')
+      }
+      
+      const data = await response.json()
+      const images = data.images || []
+      console.log('✅ Gallery loaded:', images)
+      setImages(images)
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching images:', error)
+      console.error('❌ Error fetching images:', error)
+      // Fallback to localStorage if available
+      const saved = localStorage.getItem('gallery')
+      if (saved) {
+        console.log('📦 Using cached gallery')
+        setImages(JSON.parse(saved))
+      }
       setLoading(false)
     }
   }

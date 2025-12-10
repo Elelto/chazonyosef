@@ -105,13 +105,30 @@ export const handler = async (event, context) => {
       body: JSON.stringify({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ ERROR in firebase-prayer-times function:', error)
+    console.error('❌ ERROR in firebase-prayer-times function:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    })
+    
+    let errorMessage = 'Internal server error'
+    let statusCode = 500
+    
+    if (error.message?.includes('Missing required environment variables')) {
+      errorMessage = 'Firebase configuration error - check environment variables in Netlify'
+      statusCode = 503
+    } else if (error.code === 'auth/invalid-credential') {
+      errorMessage = 'Invalid Firebase credentials - check FIREBASE_PRIVATE_KEY'
+      statusCode = 503
+    }
+    
     return {
-      statusCode: 500,
+      statusCode,
       headers,
       body: JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message 
+        error: errorMessage,
+        details: error.message,
+        hint: 'Check Netlify Function logs for more details'
       })
     }
   }

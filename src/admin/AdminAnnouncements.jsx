@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { MessageSquare, Plus, Trash2, Save, Edit2 } from 'lucide-react'
-import { db } from '../firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([])
@@ -16,23 +15,19 @@ const AdminAnnouncements = () => {
 
   const loadAnnouncements = async () => {
     try {
-      console.log('📥 Loading announcements from Firebase...')
-      const docRef = doc(db, 'settings', 'announcements')
-      const docSnap = await getDoc(docRef)
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data().announcements || []
-        console.log('✅ Announcements loaded from Firebase:', data)
-        setAnnouncements(data)
-        localStorage.setItem('announcements', JSON.stringify(data))
-      } else {
-        const saved = localStorage.getItem('announcements')
-        if (saved) setAnnouncements(JSON.parse(saved))
-      }
+      console.log('📥 Loading announcements via Netlify Function...')
+      const data = await fetchFromFirebase('firebase-announcements')
+      const announcements = data.announcements || []
+      console.log('✅ Announcements loaded:', announcements)
+      setAnnouncements(announcements)
+      localStorage.setItem('announcements', JSON.stringify(announcements))
     } catch (error) {
       console.error('❌ Error loading announcements:', error)
       const saved = localStorage.getItem('announcements')
-      if (saved) setAnnouncements(JSON.parse(saved))
+      if (saved) {
+        console.log('📦 Loaded from localStorage fallback')
+        setAnnouncements(JSON.parse(saved))
+      }
     }
   }
 
@@ -85,15 +80,14 @@ const AdminAnnouncements = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving announcements to Firebase...', announcements)
+    console.log('💾 Saving announcements via Netlify Function...', announcements)
     
     try {
-      const docRef = doc(db, 'settings', 'announcements')
-      await setDoc(docRef, { announcements })
+      await saveToFirebase('firebase-announcements', { announcements })
       
       localStorage.setItem('announcements', JSON.stringify(announcements))
       setMessage('✅ ההודעות נשמרו בהצלחה!')
-      console.log('✅ Announcements saved to Firebase successfully')
+      console.log('✅ Announcements saved successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Image, Plus, Trash2, Save } from 'lucide-react'
-import { db } from '../firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { Image, Plus, Trash2, Save, Upload } from 'lucide-react'
+import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
 const AdminGallery = () => {
   const [images, setImages] = useState([])
@@ -15,23 +14,19 @@ const AdminGallery = () => {
 
   const loadImages = async () => {
     try {
-      console.log('📥 Loading gallery from Firebase...')
-      const docRef = doc(db, 'settings', 'gallery')
-      const docSnap = await getDoc(docRef)
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data().images || []
-        console.log('✅ Gallery loaded from Firebase:', data)
-        setImages(data)
-        localStorage.setItem('gallery', JSON.stringify(data))
-      } else {
-        const saved = localStorage.getItem('gallery')
-        if (saved) setImages(JSON.parse(saved))
-      }
+      console.log('📥 Loading gallery via Netlify Function...')
+      const data = await fetchFromFirebase('firebase-gallery')
+      const images = data.images || []
+      console.log('✅ Gallery loaded:', images)
+      setImages(images)
+      localStorage.setItem('gallery', JSON.stringify(images))
     } catch (error) {
       console.error('❌ Error loading gallery:', error)
       const saved = localStorage.getItem('gallery')
-      if (saved) setImages(JSON.parse(saved))
+      if (saved) {
+        console.log('📦 Loaded from localStorage fallback')
+        setImages(JSON.parse(saved))
+      }
     }
   }
 
@@ -64,15 +59,14 @@ const AdminGallery = () => {
 
   const handleSave = async () => {
     setSaving(true)
-    console.log('💾 Saving gallery to Firebase...', images)
+    console.log('💾 Saving gallery via Netlify Function...', images)
     
     try {
-      const docRef = doc(db, 'settings', 'gallery')
-      await setDoc(docRef, { images })
+      await saveToFirebase('firebase-gallery', { images })
       
       localStorage.setItem('gallery', JSON.stringify(images))
       setMessage('✅ הגלריה נשמרה בהצלחה!')
-      console.log('✅ Gallery saved to Firebase successfully')
+      console.log('✅ Gallery saved successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {

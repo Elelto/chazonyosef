@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Clock, Save, Plus, Trash2 } from 'lucide-react'
-import { db } from '../firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
 const AdminPrayerTimes = () => {
   const [prayerTimes, setPrayerTimes] = useState({
@@ -33,32 +32,20 @@ const AdminPrayerTimes = () => {
 
   const loadPrayerTimes = async () => {
     try {
-      console.log('📥 Loading prayer times from Firebase...')
+      console.log('📥 Loading prayer times via Netlify Function...')
       
-      const docRef = doc(db, 'settings', 'prayerTimes')
-      const docSnap = await getDoc(docRef)
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data()
-        console.log('✅ Prayer times loaded from Firebase:', data)
-        setPrayerTimes(data)
-        // Backup to localStorage
-        localStorage.setItem('prayerTimes', JSON.stringify(data))
-      } else {
-        console.log('📝 No data in Firebase, using defaults')
-        // Try localStorage as fallback
-        const saved = localStorage.getItem('prayerTimes')
-        if (saved) {
-          console.log('📦 Loaded from localStorage')
-          setPrayerTimes(JSON.parse(saved))
-        }
-      }
+      const data = await fetchFromFirebase('firebase-prayer-times')
+      console.log('✅ Prayer times loaded:', data)
+      setPrayerTimes(data)
+      // Backup to localStorage
+      localStorage.setItem('prayerTimes', JSON.stringify(data))
     } catch (error) {
       console.error('❌ Error loading prayer times:', error)
       setMessage('שגיאה בטעינת זמני התפילות')
       // Try localStorage as fallback
       const saved = localStorage.getItem('prayerTimes')
       if (saved) {
+        console.log('📦 Loaded from localStorage fallback')
         setPrayerTimes(JSON.parse(saved))
       }
     } finally {
@@ -93,17 +80,16 @@ const AdminPrayerTimes = () => {
   const handleSave = async () => {
     setSaving(true)
     setMessage('')
-    console.log('💾 Saving prayer times to Firebase...', prayerTimes)
+    console.log('💾 Saving prayer times via Netlify Function...', prayerTimes)
     
     try {
-      const docRef = doc(db, 'settings', 'prayerTimes')
-      await setDoc(docRef, prayerTimes)
+      await saveToFirebase('firebase-prayer-times', prayerTimes)
       
       // Backup to localStorage
       localStorage.setItem('prayerTimes', JSON.stringify(prayerTimes))
       
       setMessage('✅ הזמנים נשמרו בהצלחה!')
-      console.log('✅ Prayer times saved to Firebase successfully')
+      console.log('✅ Prayer times saved successfully')
       
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {

@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to everyone (public website content)
+    match /{document=**} {
+      allow read: if true;
+    }
+    
+    // Deny all write access from client-side
+    // All writes must go through authenticated Netlify Functions
+    match /{document=**} {
+      allow write: if false;
+    }
+  }
+}
