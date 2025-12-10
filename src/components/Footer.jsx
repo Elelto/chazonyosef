@@ -1,8 +1,28 @@
+import { useState, useEffect } from 'react'
 import { MapPin, Phone, Mail, Clock } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { fetchFromFirebase } from '../utils/api'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
+  const [content, setContent] = useState(null)
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  const loadContent = async () => {
+    try {
+      const data = await fetchFromFirebase('firebase-footer')
+      if (data.content) {
+        setContent(data.content)
+      }
+    } catch (error) {
+      console.error('Error loading footer content:', error)
+    }
+  }
+
+  if (!content) return null
 
   return (
     <footer className="bg-gradient-to-br from-slate-800 to-slate-900 text-white mt-20">
@@ -11,11 +31,10 @@ const Footer = () => {
           {/* About */}
           <div>
             <h3 className="text-xl font-bold mb-4 text-gold-400">
-              בית המדרש "חזון יוסף"
+              {content.about.title}
             </h3>
             <p className="text-slate-300 leading-relaxed">
-              בית מדרש לתורה ותפילה המשרת את קהילת שיכון ג' והסביבה בבני ברק.
-              מזמינים אתכם להצטרף לשיעורים ולתפילות.
+              {content.about.description}
             </p>
           </div>
 
@@ -73,41 +92,41 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin size={20} className="text-gold-400 flex-shrink-0 mt-1" />
                 <span className="text-slate-300">
-                  בעל התניא 26<br />בני ברק
+                  {content.contact.address}<br />{content.contact.city}
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={20} className="text-gold-400 flex-shrink-0" />
-                <span className="text-slate-300">***-***-****</span>
+                <span className="text-slate-300">{content.contact.phone}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={20} className="text-gold-400 flex-shrink-0" />
-                <span className="text-slate-300">***@***.com</span>
+                <span className="text-slate-300">{content.contact.email}</span>
               </li>
             </ul>
           </div>
 
           {/* Prayer Times */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-gold-400">זמני תפילה</h3>
+            <h3 className="text-xl font-bold mb-4 text-gold-400">{content.prayerTimes.title}</h3>
             <div className="space-y-2 text-slate-300">
               <div className="flex items-center gap-2">
                 <Clock size={18} className="text-gold-400" />
-                <span>שחרית: 6:30, 7:30</span>
+                <span>שחרית: {content.prayerTimes.shacharit}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={18} className="text-gold-400" />
-                <span>מנחה: 13:30</span>
+                <span>מנחה: {content.prayerTimes.mincha}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={18} className="text-gold-400" />
-                <span>ערבית: 20:00</span>
+                <span>ערבית: {content.prayerTimes.arvit}</span>
               </div>
               <Link
                 to="/prayer-times"
                 className="inline-block mt-3 text-gold-400 hover:text-gold-300 transition-colors underline"
               >
-                לזמנים מלאים →
+                {content.prayerTimes.linkText}
               </Link>
             </div>
           </div>
@@ -116,10 +135,10 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-slate-700 mt-8 pt-8 text-center">
           <p className="text-slate-400">
-            © {currentYear} בית המדרש "חזון יוסף". כל הזכויות שמורות.
+            © {currentYear} {content.copyright.text}
           </p>
           <p className="text-slate-500 text-sm mt-2">
-            פותח באהבה עבור קהילת שיכון ג' והסביבה
+            {content.copyright.subtext}
           </p>
         </div>
       </div>

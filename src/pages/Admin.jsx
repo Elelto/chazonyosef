@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { LogOut, Clock, Image, MessageSquare, Calendar, FileText } from 'lucide-react'
+import { LogOut, Clock, Image, MessageSquare, Calendar, FileText, Layout, Settings, Phone } from 'lucide-react'
 import AdminPrayerTimes from '../admin/AdminPrayerTimes'
 import AdminGallery from '../admin/AdminGallery'
 import AdminAnnouncements from '../admin/AdminAnnouncements'
 import AdminEvents from '../admin/AdminEvents'
 import AdminSiteContent from '../admin/AdminSiteContent'
+import AdminFooter from '../admin/AdminFooter'
+import AdminSiteSettings from '../admin/AdminSiteSettings'
+import AdminContactPage from '../admin/AdminContactPage'
 
 const Admin = () => {
   const [user, setUser] = useState(null)
@@ -138,6 +141,9 @@ const Admin = () => {
 
   const navItems = [
     { path: '/admin/site-content', label: 'תוכן האתר', icon: FileText },
+    { path: '/admin/footer', label: 'פוטר', icon: Layout },
+    { path: '/admin/settings', label: 'הגדרות כלליות', icon: Settings },
+    { path: '/admin/contact-page', label: 'דף יצירת קשר', icon: Phone },
     { path: '/admin/prayer-times', label: 'זמני תפילות', icon: Clock },
     { path: '/admin/gallery', label: 'גלריה', icon: Image },
     { path: '/admin/announcements', label: 'הודעות', icon: MessageSquare },
@@ -202,6 +208,9 @@ const Admin = () => {
             <Routes>
               <Route index element={<Navigate to="/admin/site-content" replace />} />
               <Route path="site-content" element={<AdminSiteContent />} />
+              <Route path="footer" element={<AdminFooter />} />
+              <Route path="settings" element={<AdminSiteSettings />} />
+              <Route path="contact-page" element={<AdminContactPage />} />
               <Route path="prayer-times" element={<AdminPrayerTimes />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="announcements" element={<AdminAnnouncements />} />

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import emailjs from '@emailjs/browser'
 import { MapPin, Phone, Mail, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { fetchFromFirebase } from '../utils/api'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,22 @@ const Contact = () => {
   })
   const [status, setStatus] = useState({ type: '', message: '' })
   const [loading, setLoading] = useState(false)
+  const [content, setContent] = useState(null)
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  const loadContent = async () => {
+    try {
+      const data = await fetchFromFirebase('firebase-contact-page')
+      if (data.content) {
+        setContent(data.content)
+      }
+    } catch (error) {
+      console.error('Error loading contact page content:', error)
+    }
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -48,18 +65,26 @@ const Contact = () => {
 
       setStatus({
         type: 'success',
-        message: 'ההודעה נשלחה בהצלחה! ניצור איתך קשר בהקדם.'
+        message: content?.form.successMessage || 'ההודעה נשלחה בהצלחה! ניצור איתך קשר בהקדם.'
       })
       setFormData({ name: '', email: '', phone: '', message: '' })
     } catch (error) {
       console.error('Error:', error)
       setStatus({
         type: 'error',
-        message: 'אירעה שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר.'
+        message: content?.form.errorMessage || 'אירעה שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר.'
       })
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!content) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="spinner"></div>
+      </div>
+    )
   }
 
   return (
@@ -67,16 +92,16 @@ const Contact = () => {
       <div className="container-custom">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="section-title">צור קשר</h1>
+          <h1 className="section-title">{content.header.title}</h1>
           <p className="section-subtitle">
-            נשמח לשמוע ממך! צור איתנו קשר בכל שאלה, הצעה או בקשה
+            {content.header.subtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">פרטי התקשרות</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">{content.contactInfo.title}</h2>
             
             <div className="space-y-6">
               {/* Address */}
@@ -88,16 +113,16 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">כתובת</h3>
                     <p className="text-slate-600">
-                      בעל התניא 26<br />
-                      בני ברק, ישראל
+                      {content.contactInfo.address.street}<br />
+                      {content.contactInfo.address.city}, {content.contactInfo.address.country}
                     </p>
                     <a
-                      href="https://www.google.com/maps/search/?api=1&query=בעל+התניא+26+בני+ברק"
+                      href={content.contactInfo.address.mapLink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary-600 hover:text-primary-700 underline mt-2 inline-block"
                     >
-                      פתח ב-Google Maps →
+                      {content.contactInfo.address.mapLinkText}
                     </a>
                   </div>
                 </div>
@@ -112,10 +137,10 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">טלפון</h3>
                     <a
-                      href="tel:***-***-****"
+                      href={`tel:${content.contactInfo.phone.number}`}
                       className="text-slate-600 hover:text-gold-600 transition-colors"
                     >
-                      ***-***-****
+                      {content.contactInfo.phone.display}
                     </a>
                   </div>
                 </div>
@@ -130,10 +155,10 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">אימייל</h3>
                     <a
-                      href="mailto:***@***.com"
+                      href={`mailto:${content.contactInfo.email.address}`}
                       className="text-slate-600 hover:text-primary-600 transition-colors"
                     >
-                      ***@***.com
+                      {content.contactInfo.email.display}
                     </a>
                   </div>
                 </div>
@@ -148,8 +173,8 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">שעות פעילות</h3>
                     <div className="text-slate-600 space-y-1">
-                      <p>ימי חול: 6:00 - 22:00</p>
-                      <p>שבת: לפי זמני התפילות</p>
+                      <p>{content.contactInfo.hours.weekdays}</p>
+                      <p>{content.contactInfo.hours.shabbat}</p>
                     </div>
                   </div>
                 </div>
@@ -158,11 +183,11 @@ const Contact = () => {
 
             {/* Map Placeholder */}
             <div className="mt-8 card">
-              <h3 className="font-bold text-slate-800 mb-4">מיקום</h3>
+              <h3 className="font-bold text-slate-800 mb-4">{content.map.title}</h3>
               <div className="bg-slate-200 rounded-lg h-64 flex items-center justify-center">
                 <div className="text-center text-slate-600">
                   <MapPin className="mx-auto mb-2" size={48} />
-                  <p>מפה תתווסף בקרוב</p>
+                  <p>{content.map.placeholder}</p>
                 </div>
               </div>
             </div>
@@ -170,13 +195,13 @@ const Contact = () => {
 
           {/* Contact Form */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">שלח לנו הודעה</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">{content.form.title}</h2>
             
             <div className="card">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-slate-700 font-medium mb-2">
-                    שם מלא *
+                    {content.form.nameLabel} *
                   </label>
                   <input
                     type="text"
@@ -186,13 +211,13 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="input-field"
-                    placeholder="הכנס את שמך המלא"
+                    placeholder={content.form.namePlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block text-slate-700 font-medium mb-2">
-                    כתובת אימייל *
+                    {content.form.emailLabel} *
                   </label>
                   <input
                     type="email"
@@ -202,13 +227,13 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="input-field"
-                    placeholder="example@email.com"
+                    placeholder={content.form.emailPlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-slate-700 font-medium mb-2">
-                    מספר טלפון
+                    {content.form.phoneLabel}
                   </label>
                   <input
                     type="tel"
@@ -217,13 +242,13 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="input-field"
-                    placeholder="050-1234567"
+                    placeholder={content.form.phonePlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-slate-700 font-medium mb-2">
-                    הודעה *
+                    {content.form.messageLabel} *
                   </label>
                   <textarea
                     id="message"
@@ -233,7 +258,7 @@ const Contact = () => {
                     required
                     rows="6"
                     className="input-field resize-none"
-                    placeholder="כתוב את הודעתך כאן..."
+                    placeholder={content.form.messagePlaceholder}
                   ></textarea>
                 </div>
 
@@ -269,12 +294,12 @@ const Contact = () => {
                   {loading ? (
                     <>
                       <div className="spinner w-5 h-5 border-2"></div>
-                      <span>שולח...</span>
+                      <span>{content.form.submittingButton}</span>
                     </>
                   ) : (
                     <>
                       <Mail size={20} />
-                      <span>שלח הודעה</span>
+                      <span>{content.form.submitButton}</span>
                     </>
                   )}
                 </button>
