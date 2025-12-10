@@ -14,6 +14,8 @@ const Admin = () => {
   useEffect(() => {
     console.log('🔐 Initializing Netlify Identity...')
     
+    let initTimeout
+    
     // Initialize Netlify Identity
     if (window.netlifyIdentity) {
       console.log('✅ Netlify Identity widget found')
@@ -29,6 +31,14 @@ const Admin = () => {
         setUser(currentUser)
         setLoading(false)
       } else {
+        console.log('⏳ No current user, waiting for init event...')
+        
+        // Set a timeout as fallback in case init event never fires
+        initTimeout = setTimeout(() => {
+          console.log('⚠️ Init event timeout - stopping loading spinner')
+          setLoading(false)
+        }, 2000)
+        
         // Wait for init event if no current user
         window.netlifyIdentity.on('init', (user) => {
           console.log('🔵 Identity initialized:', {
@@ -37,6 +47,7 @@ const Admin = () => {
             token: user?.token?.access_token ? 'Token exists' : 'No token',
             tokenExpiry: user?.token?.expires_at
           })
+          clearTimeout(initTimeout)
           setUser(user)
           setLoading(false)
         })
@@ -65,6 +76,12 @@ const Admin = () => {
     } else {
       console.error('❌ Netlify Identity widget not found!')
       setLoading(false)
+    }
+    
+    return () => {
+      if (initTimeout) {
+        clearTimeout(initTimeout)
+      }
     }
   }, [])
 
