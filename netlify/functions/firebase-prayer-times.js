@@ -18,7 +18,24 @@ const defaultPrayerTimes = {
       arvit: '20:15',
       shabbatEnds: '20:25'
     }
-  }
+  },
+  special: [
+    {
+      title: 'שיעור דף יומי',
+      days: 'כל יום',
+      time: '20:30'
+    },
+    {
+      title: 'שיעור הלכה',
+      days: 'ראשון-חמישי',
+      time: '21:00'
+    },
+    {
+      title: 'שיעור משניות',
+      days: 'שישי',
+      time: '15:00'
+    }
+  ]
 }
 
 export const handler = async (event, context) => {

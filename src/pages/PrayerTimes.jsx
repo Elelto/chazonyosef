@@ -185,27 +185,29 @@ const PrayerTimes = () => {
         </div>
 
         {/* Special Events */}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
-            <Clock className="text-gold-500" size={32} />
-            שיעורים ואירועים
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {prayerTimes.special.map((event, index) => (
-              <div key={index} className="card hover:shadow-xl transition-shadow">
-                <h3 className="text-lg font-bold text-slate-800 mb-2">
-                  {event.title}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-600">{event.days}</span>
-                  <span className="text-xl font-bold text-primary-600">
-                    {event.time}
-                  </span>
+        {prayerTimes.special && prayerTimes.special.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+              <Clock className="text-gold-500" size={32} />
+              שיעורים ואירועים
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {prayerTimes.special.map((event, index) => (
+                <div key={index} className="card hover:shadow-xl transition-shadow">
+                  <h3 className="text-lg font-bold text-slate-800 mb-2">
+                    {event.title}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600">{event.days}</span>
+                    <span className="text-xl font-bold text-primary-600">
+                      {event.time}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Note */}
         <div className="mt-12 p-6 bg-primary-50 border-r-4 border-primary-500 rounded-lg">
