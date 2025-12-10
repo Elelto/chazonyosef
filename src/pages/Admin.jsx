@@ -18,16 +18,29 @@ const Admin = () => {
     if (window.netlifyIdentity) {
       console.log('✅ Netlify Identity widget found')
       
-      window.netlifyIdentity.on('init', (user) => {
-        console.log('🔵 Identity initialized:', {
-          hasUser: !!user,
-          email: user?.email,
-          token: user?.token?.access_token ? 'Token exists' : 'No token',
-          tokenExpiry: user?.token?.expires_at
+      // Check if user is already logged in
+      const currentUser = window.netlifyIdentity.currentUser()
+      if (currentUser) {
+        console.log('✅ User already logged in:', {
+          email: currentUser.email,
+          name: currentUser.user_metadata?.full_name,
+          token: currentUser.token?.access_token ? 'Token exists' : 'No token'
         })
-        setUser(user)
+        setUser(currentUser)
         setLoading(false)
-      })
+      } else {
+        // Wait for init event if no current user
+        window.netlifyIdentity.on('init', (user) => {
+          console.log('🔵 Identity initialized:', {
+            hasUser: !!user,
+            email: user?.email,
+            token: user?.token?.access_token ? 'Token exists' : 'No token',
+            tokenExpiry: user?.token?.expires_at
+          })
+          setUser(user)
+          setLoading(false)
+        })
+      }
 
       window.netlifyIdentity.on('login', (user) => {
         console.log('✅ User logged in:', {
