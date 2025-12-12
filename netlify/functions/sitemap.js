@@ -4,7 +4,10 @@
  */
 
 export async function handler(event, context) {
-  const baseUrl = 'https://chazonyosef.netlify.app';
+  const headers = event?.headers || {};
+  const host = headers['x-forwarded-host'] || headers.host;
+  const proto = headers['x-forwarded-proto'] || 'https';
+  const baseUrl = host ? `${proto}://${host}` : 'https://chazonyosef.netlify.app';
   const currentDate = new Date().toISOString().split('T')[0];
   
   // Define all pages with their priority and change frequency
@@ -17,6 +20,11 @@ export async function handler(event, context) {
     { url: '/contact', priority: '0.7', changefreq: 'monthly' },
   ];
 
+  const toLoc = (pageUrl) => {
+    if (!pageUrl) return `${baseUrl}/`;
+    return `${baseUrl}${pageUrl}`;
+  };
+
   // Generate XML sitemap
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -24,7 +32,7 @@ export async function handler(event, context) {
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 ${pages.map(page => `  <url>
-    <loc>${baseUrl}${page.url}</loc>
+    <loc>${toLoc(page.url)}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
