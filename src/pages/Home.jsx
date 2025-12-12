@@ -3,15 +3,87 @@ import { Link } from 'react-router-dom'
 import { Clock, Image, Mail, Phone, BookOpen, Users, Heart } from 'lucide-react'
 import { fetchFromFirebase } from '../utils/api'
 
+// Default content for development mode
+const defaultContent = {
+  hero: {
+    title: 'בית המדרש "חזון יוסף"',
+    subtitle: 'שיכון ג\' והסביבה',
+    address: 'בעל התניא 26, בני ברק'
+  },
+  about: {
+    title: 'אודות בית המדרש',
+    paragraph1: 'בית המדרש "חזון יוסף" משמש כמרכז רוחני לקהילת שיכון ג\' והסביבה בבני ברק. אנו מציעים תפילות במניינים קבועים, שיעורי תורה מגוונים, ואווירה חמה ומזמינה לכל המבקשים להתקרב לתורה ולעבודת ה\'.',
+    paragraph2: 'בית המדרש נקרא על שם הרב יוסף זצ"ל, ומשמש כמקום מפגש לתלמידי חכמים, אברכים ובעלי בתים המבקשים לעסוק בתורה ובתפילה באווירה של קדושה ויראת שמים.'
+  },
+  features: {
+    title: 'מה אנו מציעים',
+    items: [
+      {
+        id: 1,
+        title: 'תפילות במניין',
+        description: 'מניינים קבועים לשחרית, מנחה וערבית בזמנים נוחים לכל הציבור',
+        icon: 'clock'
+      },
+      {
+        id: 2,
+        title: 'שיעורי תורה',
+        description: 'שיעורים מגוונים בגמרא, הלכה, מוסר ומחשבה על ידי מגידי שיעורים מובילים',
+        icon: 'book'
+      },
+      {
+        id: 3,
+        title: 'קהילה חמה',
+        description: 'אווירה משפחתית ומזמינה, קהילה תומכת ומגובשת של אנשים יראי שמים',
+        icon: 'users'
+      },
+      {
+        id: 4,
+        title: 'אירועים מיוחדים',
+        description: 'סיומי מסכת, מסיבות מצווה, וערבי עיון מיוחדים לחגים ומועדים',
+        icon: 'heart'
+      },
+      {
+        id: 5,
+        title: 'מתקנים מודרניים',
+        description: 'בית מדרש מרווח ומאובזר, ספריית קודש עשירה, ומערכת הגברה איכותית',
+        icon: 'image'
+      },
+      {
+        id: 6,
+        title: 'עדכונים שוטפים',
+        description: 'הצטרפו לרשימת התפוצה שלנו לקבלת עדכונים על שיעורים, אירועים וזמני תפילה',
+        icon: 'mail'
+      }
+    ]
+  },
+  cta: {
+    title: 'הצטרפו אלינו',
+    description: 'אנו מזמינים אתכם להצטרף לקהילה שלנו, להשתתף בתפילות ובשיעורים, ולהיות חלק ממשפחת "חזון יוסף"'
+  },
+  quickLinks: {
+    title: 'גישה מהירה'
+  }
+}
+
 const Home = () => {
   const [content, setContent] = useState(null)
   const [loading, setLoading] = useState(true)
+  const isDev = import.meta.env.DEV
 
   useEffect(() => {
     loadContent()
   }, [])
 
   const loadContent = async () => {
+    // In development mode, use default content without API call
+    if (isDev) {
+      console.log('🔧 Dev mode: Using default site content')
+      setContent(defaultContent)
+      setLoading(false)
+      return
+    }
+
+    // In production, fetch from Firebase
     try {
       const data = await fetchFromFirebase('firebase-site-content')
       if (data.content) {
@@ -48,8 +120,19 @@ const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-indigo-50/30 to-slate-50 border-b border-slate-200 py-20">
-        <div className="container-custom">
+      <section className="relative bg-gradient-to-b from-indigo-50/30 to-slate-50 border-b border-slate-200 py-20 overflow-hidden">
+        {/* Background Image with Black & White Filter */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/hero-bg.jpeg)',
+            filter: 'grayscale(100%)',
+            opacity: '0.3'
+          }}
+        />
+        
+        {/* Content Overlay */}
+        <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Logo */}
             <div className="mb-8">

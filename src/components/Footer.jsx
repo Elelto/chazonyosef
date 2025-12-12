@@ -3,15 +3,49 @@ import { MapPin, Phone, Mail, Clock } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { fetchFromFirebase } from '../utils/api'
 
+// Default content for development mode
+const defaultContent = {
+  about: {
+    title: 'בית המדרש "חזון יוסף"',
+    description: 'בית מדרש לתורה ותפילה המשרת את קהילת שיכון ג\' והסביבה בבני ברק. מזמינים אתכם להצטרף לשיעורים ולתפילות.'
+  },
+  contact: {
+    address: 'בעל התניא 26',
+    city: 'בני ברק',
+    phone: '***-***-****',
+    email: '***@***.com'
+  },
+  prayerTimes: {
+    title: 'זמני תפילה',
+    shacharit: '6:30, 7:30',
+    mincha: '13:30',
+    arvit: '20:00',
+    linkText: 'לזמנים מלאים →'
+  },
+  copyright: {
+    text: 'בית המדרש "חזון יוסף". כל הזכויות שמורות.',
+    subtext: 'פותח באהבה עבור קהילת שיכון ג\' והסביבה'
+  }
+}
+
 const Footer = () => {
   const currentYear = new Date().getFullYear()
   const [content, setContent] = useState(null)
+  const isDev = import.meta.env.DEV
 
   useEffect(() => {
     loadContent()
   }, [])
 
   const loadContent = async () => {
+    // In development mode, use default content without API call
+    if (isDev) {
+      console.log('🔧 Dev mode: Using default footer content')
+      setContent(defaultContent)
+      return
+    }
+
+    // In production, fetch from Firebase
     try {
       const data = await fetchFromFirebase('firebase-footer')
       if (data.content) {
