@@ -1,0 +1,11 @@
+# robots.txt for Chazon Yosef Website
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://chazonyosef.netlify.app/sitemap.xml
+
+# Disallow admin areas
+User-agent: *
+Disallow: /admin
+Disallow: /.netlify/
