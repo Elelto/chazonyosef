@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Settings, Save, RotateCcw } from 'lucide-react'
+import { Settings, Save, RotateCcw, Palette } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
+import ColorPicker from '../components/ColorPicker'
+import AccessibilityChecker from '../components/AccessibilityChecker'
+import ColorPresetManager from '../components/ColorPresetManager'
+import { applyColorsToCSS } from '../utils/colorUtils'
 
 const AdminSiteSettings = () => {
   const [settings, setSettings] = useState({
@@ -30,10 +34,17 @@ const AdminSiteSettings = () => {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
+  const [showColorSection, setShowColorSection] = useState('editor')
 
   useEffect(() => {
     loadSettings()
   }, [])
+
+  useEffect(() => {
+    if (settings.colors) {
+      applyColorsToCSS(settings.colors)
+    }
+  }, [settings.colors])
 
   const loadSettings = async () => {
     try {
@@ -94,6 +105,31 @@ const AdminSiteSettings = () => {
       }
     }))
     setHasChanges(true)
+  }
+
+  const updateColor = (colorType, value) => {
+    setSettings(prev => ({
+      ...prev,
+      colors: {
+        ...prev.colors,
+        [colorType]: value
+      }
+    }))
+    setHasChanges(true)
+  }
+
+  const applyPreset = (preset) => {
+    setSettings(prev => ({
+      ...prev,
+      colors: {
+        primary: preset.primary,
+        secondary: preset.secondary,
+        accent: preset.accent
+      }
+    }))
+    setHasChanges(true)
+    setMessage('✨ ערכת הצבעים הוחלה בהצלחה!')
+    setTimeout(() => setMessage(''), 3000)
   }
 
   return (
@@ -216,69 +252,186 @@ const AdminSiteSettings = () => {
         </div>
 
         {/* Color Settings */}
-        <div className="mb-8 p-6 bg-slate-50 rounded-lg">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">ערכת צבעים</h3>
-          <p className="text-sm text-slate-600 mb-4">
-            ⚠️ שינוי צבעים דורש עדכון קוד CSS - תכונה זו לעתיד
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-50 pointer-events-none">
-            <div>
-              <label className="block text-slate-700 font-medium mb-2">צבע ראשי (Primary)</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
+        <div className="mb-8 p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Palette className="text-primary-600" size={28} />
+              מערכת ניהול צבעים מתקדמת
+            </h3>
+            <div className="flex gap-2 border-2 border-slate-300 rounded-lg p-1 bg-white">
+              <button
+                type="button"
+                onClick={() => setShowColorSection('editor')}
+                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                  showColorSection === 'editor'
+                    ? 'bg-primary-600 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                עורך צבעים
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowColorSection('presets')}
+                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                  showColorSection === 'presets'
+                    ? 'bg-primary-600 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                ערכות מוכנות
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowColorSection('accessibility')}
+                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                  showColorSection === 'accessibility'
+                    ? 'bg-primary-600 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                בדיקת נגישות
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            {showColorSection === 'editor' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-blue-800 text-sm">
+                    ✨ <strong>מערכת מתקדמת:</strong> בחר צבעים עם תצוגה מקדימה חיה, גנרטור גוונים אוטומטי ובדיקות נגישות.
+                    השינויים יוחלו באופן מיידי!
+                  </p>
+                </div>
+
+                <ColorPicker
+                  label="צבע ראשי (Primary)"
                   value={settings.colors.primary}
-                  onChange={(e) => updateSettings('colors', 'primary', e.target.value)}
-                  className="w-16 h-10 rounded cursor-pointer"
-                  disabled
+                  onChange={(value) => updateColor('primary', value)}
+                  showShades={true}
+                  showPreview={true}
+                  showAccessibility={true}
                 />
-                <input
-                  type="text"
-                  value={settings.colors.primary}
-                  onChange={(e) => updateSettings('colors', 'primary', e.target.value)}
-                  className="input-field flex-1"
-                  disabled
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-slate-700 font-medium mb-2">צבע משני (Secondary)</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
+
+                <div className="border-t-2 border-slate-200 my-6"></div>
+
+                <ColorPicker
+                  label="צבע משני (Secondary)"
                   value={settings.colors.secondary}
-                  onChange={(e) => updateSettings('colors', 'secondary', e.target.value)}
-                  className="w-16 h-10 rounded cursor-pointer"
-                  disabled
+                  onChange={(value) => updateColor('secondary', value)}
+                  showShades={true}
+                  showPreview={true}
+                  showAccessibility={true}
                 />
-                <input
-                  type="text"
-                  value={settings.colors.secondary}
-                  onChange={(e) => updateSettings('colors', 'secondary', e.target.value)}
-                  className="input-field flex-1"
-                  disabled
+
+                <div className="border-t-2 border-slate-200 my-6"></div>
+
+                <ColorPicker
+                  label="צבע הדגשה (Accent)"
+                  value={settings.colors.accent}
+                  onChange={(value) => updateColor('accent', value)}
+                  showShades={true}
+                  showPreview={true}
+                  showAccessibility={true}
+                />
+
+                <div className="border-t-2 border-slate-200 my-6"></div>
+
+                {/* Combined Preview */}
+                <div className="border-2 border-primary-200 rounded-lg p-6 bg-gradient-to-br from-white to-slate-50">
+                  <h4 className="text-lg font-bold text-slate-800 mb-4">תצוגה מקדימה משולבת</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-slate-600">צבע ראשי</p>
+                      <button
+                        type="button"
+                        className="w-full px-4 py-3 rounded-lg font-medium text-white"
+                        style={{ backgroundColor: settings.colors.primary }}
+                      >
+                        כפתור ראשי
+                      </button>
+                      <div
+                        className="w-full px-4 py-2 rounded-lg text-center font-medium"
+                        style={{ backgroundColor: settings.colors.primary + '20', color: settings.colors.primary }}
+                      >
+                        תג צבעוני
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-slate-600">צבע משני</p>
+                      <button
+                        type="button"
+                        className="w-full px-4 py-3 rounded-lg font-medium text-white"
+                        style={{ backgroundColor: settings.colors.secondary }}
+                      >
+                        כפתור משני
+                      </button>
+                      <div
+                        className="w-full px-4 py-2 rounded-lg text-center font-medium"
+                        style={{ backgroundColor: settings.colors.secondary + '20', color: settings.colors.secondary }}
+                      >
+                        תג צבעוני
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-slate-600">צבע הדגשה</p>
+                      <button
+                        type="button"
+                        className="w-full px-4 py-3 rounded-lg font-medium text-white"
+                        style={{ backgroundColor: settings.colors.accent }}
+                      >
+                        כפתור הדגשה
+                      </button>
+                      <div
+                        className="w-full px-4 py-2 rounded-lg text-center font-medium"
+                        style={{ backgroundColor: settings.colors.accent + '20', color: settings.colors.accent }}
+                      >
+                        תג צבעוני
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showColorSection === 'presets' && (
+              <div className="animate-fade-in">
+                <ColorPresetManager
+                  currentColors={settings.colors}
+                  onApplyPreset={applyPreset}
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-slate-700 font-medium mb-2">צבע הדגשה (Accent)</label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={settings.colors.accent}
-                  onChange={(e) => updateSettings('colors', 'accent', e.target.value)}
-                  className="w-16 h-10 rounded cursor-pointer"
-                  disabled
-                />
-                <input
-                  type="text"
-                  value={settings.colors.accent}
-                  onChange={(e) => updateSettings('colors', 'accent', e.target.value)}
-                  className="input-field flex-1"
-                  disabled
-                />
+            )}
+
+            {showColorSection === 'accessibility' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-blue-800 text-sm">
+                    <strong>בדיקת נגישות WCAG 2.1:</strong> ודא שהצבעים שלך עומדים בתקני נגישות בינלאומיים.
+                    AA = רמה בסיסית, AAA = רמה מתקדמת.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-4">צבע ראשי</h4>
+                    <AccessibilityChecker foreground={settings.colors.primary} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-4">צבע משני</h4>
+                    <AccessibilityChecker foreground={settings.colors.secondary} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-4">צבע הדגשה</h4>
+                    <AccessibilityChecker foreground={settings.colors.accent} />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
