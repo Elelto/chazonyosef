@@ -9,6 +9,8 @@ import Newsletter from './pages/Newsletter'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
+import { fetchFromFirebase } from './utils/api'
+import { applyColorsToCSS } from './utils/colorUtils'
 
 function App() {
   useEffect(() => {
@@ -16,7 +18,32 @@ function App() {
     if (window.netlifyIdentity) {
       window.netlifyIdentity.init()
     }
+
+    // Load and apply color settings
+    loadColorSettings()
   }, [])
+
+  const loadColorSettings = async () => {
+    try {
+      // Try to load from Firebase
+      const data = await fetchFromFirebase('firebase-settings')
+      if (data.settings?.colors) {
+        console.log('🎨 Applying colors from Firebase:', data.settings.colors)
+        applyColorsToCSS(data.settings.colors)
+        localStorage.setItem('siteSettings', JSON.stringify(data.settings))
+      }
+    } catch (error) {
+      // Fallback to localStorage
+      console.log('📦 Loading colors from localStorage fallback')
+      const saved = localStorage.getItem('siteSettings')
+      if (saved) {
+        const settings = JSON.parse(saved)
+        if (settings.colors) {
+          applyColorsToCSS(settings.colors)
+        }
+      }
+    }
+  }
 
   return (
     <Router>
