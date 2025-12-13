@@ -153,11 +153,11 @@ const Home = () => {
               {content.hero.address}
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/prayer-times" className="bg-indigo-900 hover:bg-indigo-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+              <Link to="/prayer-times" className="bg-primary-900 hover:bg-primary-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
                 <Clock size={20} />
                 זמני תפילות
               </Link>
-              <Link to="/contact" className="border-2 border-indigo-900 hover:bg-indigo-900 text-indigo-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+              <Link to="/contact" className="border-2 border-primary-900 hover:bg-primary-900 text-primary-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
                 <Phone size={20} />
                 צור קשר
               </Link>
@@ -182,27 +182,27 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-b from-slate-50 to-indigo-50/20">
+      <section className="py-20 bg-gradient-to-b from-slate-50 to-primary-50/20">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.features.title}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-900 mb-8 text-center">{content.features.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {content.features.items.map((item, index) => {
               const Icon = getIcon(item.icon)
               const isIndigo = index % 2 === 0
               return (
                 <div key={item.id} className={isIndigo 
-                  ? 'card text-center border-r-4 border-indigo-600 hover:shadow-lg hover:shadow-indigo-100 transition-all'
+                  ? 'card text-center border-r-4 border-primary-600 hover:shadow-lg hover:shadow-primary-100 transition-all'
                   : 'card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all'
                 }>
                   <div className="mb-6">
                     <div className={isIndigo 
-                      ? 'w-16 h-16 bg-indigo-100 flex items-center justify-center mx-auto rounded-lg'
+                      ? 'w-16 h-16 bg-primary-100 flex items-center justify-center mx-auto rounded-lg'
                       : 'w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg'
                     }>
-                      <Icon className={isIndigo ? 'text-indigo-700' : 'text-teal-700'} size={32} />
+                      <Icon className={isIndigo ? 'text-primary-700' : 'text-teal-700'} size={32} />
                     </div>
                   </div>
-                  <h3 className={isIndigo ? 'text-xl font-bold mb-3 text-indigo-900' : 'text-xl font-bold mb-3 text-teal-900'}>
+                  <h3 className={isIndigo ? 'text-xl font-bold mb-3 text-primary-900' : 'text-xl font-bold mb-3 text-teal-900'}>
                     {item.title}
                   </h3>
                   <p className="text-slate-600 leading-relaxed">
@@ -216,22 +216,22 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-indigo-50 border-b border-slate-200">
+      <section className="py-20 bg-primary-50 border-b border-slate-200">
         <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-indigo-900">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-primary-900">
             {content.cta.title}
           </h2>
           <p className="text-lg mb-10 max-w-2xl mx-auto text-slate-600">
             {content.cta.description}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/newsletter" className="bg-indigo-900 hover:bg-indigo-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+            <Link to="/newsletter" className="bg-primary-900 hover:bg-primary-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
               <Mail size={20} />
               הרשמה לרשימת תפוצה
             </Link>
             <Link
               to="/contact"
-              className="border-2 border-indigo-900 hover:bg-indigo-900 text-indigo-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2"
+              className="border-2 border-primary-900 hover:bg-primary-900 text-primary-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2"
             >
               <Phone size={20} />
               צור קשר
@@ -241,18 +241,18 @@ const Home = () => {
       </section>
 
       {/* Quick Links */}
-      <section className="py-20 bg-gradient-to-b from-indigo-50/20 to-slate-50">
+      <section className="py-20 bg-gradient-to-b from-primary-50/20 to-slate-50">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.quickLinks.title}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-900 mb-8 text-center">{content.quickLinks.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               to="/prayer-times"
-              className="card text-center hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100 transition-all border-t-4 border-t-indigo-600"
+              className="card text-center hover:border-primary-300 hover:shadow-lg hover:shadow-primary-100 transition-all border-t-4 border-t-primary-600"
             >
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Clock className="text-indigo-700" size={28} />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Clock className="text-primary-700" size={28} />
               </div>
-              <h3 className="text-base font-bold text-indigo-900">זמני תפילות</h3>
+              <h3 className="text-base font-bold text-primary-900">זמני תפילות</h3>
             </Link>
             <Link
               to="/gallery"
@@ -265,12 +265,12 @@ const Home = () => {
             </Link>
             <Link
               to="/newsletter"
-              className="card text-center hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100 transition-all border-t-4 border-t-indigo-600"
+              className="card text-center hover:border-primary-300 hover:shadow-lg hover:shadow-primary-100 transition-all border-t-4 border-t-primary-600"
             >
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Mail className="text-indigo-700" size={28} />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Mail className="text-primary-700" size={28} />
               </div>
-              <h3 className="text-base font-bold text-indigo-900">רשימת תפוצה</h3>
+              <h3 className="text-base font-bold text-primary-900">רשימת תפוצה</h3>
             </Link>
             <Link
               to="/contact"
