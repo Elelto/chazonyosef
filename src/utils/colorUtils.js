@@ -176,6 +176,14 @@ export const commonColors = [
 ]
 
 /**
+ * Convert HEX to RGB string for CSS variables
+ */
+const hexToRgbString = (hex) => {
+  const rgb = hexToRgb(hex)
+  return rgb ? `${rgb.r} ${rgb.g} ${rgb.b}` : '0 0 0'
+}
+
+/**
  * Apply colors to CSS variables
  */
 export const applyColorsToCSS = (colors) => {
@@ -185,26 +193,26 @@ export const applyColorsToCSS = (colors) => {
   if (colors.primary) {
     const primaryShades = generateShades(colors.primary)
     Object.entries(primaryShades).forEach(([shade, color]) => {
-      root.style.setProperty(`--color-primary-${shade}`, color)
+      root.style.setProperty(`--color-primary-${shade}`, hexToRgbString(color))
     })
-    root.style.setProperty('--color-primary', colors.primary)
+    root.style.setProperty('--color-primary', hexToRgbString(colors.primary))
   }
   
   // Apply secondary color and its shades
   if (colors.secondary) {
     const secondaryShades = generateShades(colors.secondary)
     Object.entries(secondaryShades).forEach(([shade, color]) => {
-      root.style.setProperty(`--color-secondary-${shade}`, color)
+      root.style.setProperty(`--color-secondary-${shade}`, hexToRgbString(color))
     })
-    root.style.setProperty('--color-secondary', colors.secondary)
+    root.style.setProperty('--color-secondary', hexToRgbString(colors.secondary))
   }
   
   // Apply accent color and its shades
   if (colors.accent) {
     const accentShades = generateShades(colors.accent)
     Object.entries(accentShades).forEach(([shade, color]) => {
-      root.style.setProperty(`--color-accent-${shade}`, color)
+      root.style.setProperty(`--color-accent-${shade}`, hexToRgbString(color))
     })
-    root.style.setProperty('--color-accent', colors.accent)
+    root.style.setProperty('--color-accent', hexToRgbString(colors.accent))
   }
 }
