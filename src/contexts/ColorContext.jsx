@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { fetchFromFirebase } from '../utils/api'
 import { applyColorsToCSS } from '../utils/colorUtils'
+import { applyFont } from '../utils/fontUtils'
 
 const ColorContext = createContext()
 
@@ -20,7 +21,7 @@ export const ColorProvider = ({ children }) => {
   }, [])
 
   const loadColorSettings = async () => {
-    // First, apply colors from localStorage synchronously (if available)
+    // First, apply colors and fonts from localStorage synchronously (if available)
     const saved = localStorage.getItem('siteSettings')
     if (saved) {
       try {
@@ -28,6 +29,10 @@ export const ColorProvider = ({ children }) => {
         if (settings.colors) {
           console.log('🎨 Applying colors from localStorage (sync)')
           applyColorsToCSS(settings.colors)
+        }
+        if (settings.font) {
+          console.log('🔤 Applying font from localStorage (sync):', settings.font)
+          applyFont(settings.font)
         }
       } catch (error) {
         console.error('Error parsing localStorage settings:', error)
@@ -37,16 +42,22 @@ export const ColorProvider = ({ children }) => {
     // Mark colors as loaded so UI can render
     setColorsLoaded(true)
 
-    // Then, fetch from Firebase in the background to get latest colors
+    // Then, fetch from Firebase in the background to get latest colors and fonts
     try {
       const data = await fetchFromFirebase('firebase-settings')
-      if (data.settings?.colors) {
-        console.log('🎨 Updating colors from Firebase:', data.settings.colors)
-        applyColorsToCSS(data.settings.colors)
+      if (data.settings) {
+        if (data.settings.colors) {
+          console.log('🎨 Updating colors from Firebase:', data.settings.colors)
+          applyColorsToCSS(data.settings.colors)
+        }
+        if (data.settings.font) {
+          console.log('🔤 Updating font from Firebase:', data.settings.font)
+          applyFont(data.settings.font)
+        }
         localStorage.setItem('siteSettings', JSON.stringify(data.settings))
       }
     } catch (error) {
-      console.log('📦 Using localStorage colors (Firebase unavailable)')
+      console.log('📦 Using localStorage settings (Firebase unavailable)')
     }
   }
 

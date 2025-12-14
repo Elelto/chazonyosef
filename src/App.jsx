@@ -10,11 +10,9 @@ import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import { ColorProvider, useColors } from './contexts/ColorContext'
-import { FontProvider, useFonts } from './contexts/FontContext'
 
 function AppContent() {
   const { colorsLoaded } = useColors()
-  const { fontsLoaded } = useFonts()
 
   useEffect(() => {
     // Initialize Netlify Identity
@@ -24,7 +22,7 @@ function AppContent() {
   }, [])
 
   // Show loading spinner until colors and fonts are loaded
-  if (!colorsLoaded || !fontsLoaded) {
+  if (!colorsLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="spinner"></div>
@@ -56,9 +54,7 @@ function AppContent() {
 function App() {
   return (
     <ColorProvider>
-      <FontProvider>
-        <AppContent />
-      </FontProvider>
+      <AppContent />
     </ColorProvider>
   )
 }
