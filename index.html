@@ -143,7 +143,7 @@
               console.log('🎨 Colors preloaded from localStorage');
             }
             
-            // Preload font
+            // Preload font (async, non-blocking)
             if (settings.font) {
               const fontMap = {
                 'Assistant': 'Assistant, sans-serif',
@@ -175,21 +175,26 @@
               const googleFont = googleFontMap[settings.font];
               
               if (fontValue && googleFont) {
-                // Load Google Font
-                const existingLink = document.getElementById('preload-font-link');
-                if (existingLink) {
-                  existingLink.remove();
-                }
-                
-                const link = document.createElement('link');
-                link.id = 'preload-font-link';
-                link.rel = 'stylesheet';
-                link.href = `https://fonts.googleapis.com/css2?family=${googleFont}&display=swap`;
-                document.head.appendChild(link);
-                
-                // Apply font immediately
+                // Apply font CSS variable immediately
                 document.documentElement.style.setProperty('--font-family', fontValue);
-                console.log('🔤 Font preloaded from localStorage:', settings.font);
+                
+                // Load Google Font asynchronously (non-blocking)
+                setTimeout(function() {
+                  const existingLink = document.getElementById('preload-font-link');
+                  if (existingLink) {
+                    existingLink.remove();
+                  }
+                  
+                  const link = document.createElement('link');
+                  link.id = 'preload-font-link';
+                  link.rel = 'stylesheet';
+                  link.href = `https://fonts.googleapis.com/css2?family=${googleFont}&display=swap`;
+                  link.media = 'print';
+                  link.onload = function() { this.media = 'all'; };
+                  document.head.appendChild(link);
+                  
+                  console.log('🔤 Font preloaded from localStorage:', settings.font);
+                }, 0);
               }
             }
           }
