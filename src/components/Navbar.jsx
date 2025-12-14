@@ -34,7 +34,7 @@ const Navbar = () => {
             <img
               src="/logo.png"
               alt="חזון יוסף"
-              className="h-12 w-auto logo-image"
+              className="h-12 w-auto"
             />
             <div className="hidden md:block">
               <h1 className="text-lg font-bold text-primary-900">

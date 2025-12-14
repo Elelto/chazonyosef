@@ -139,7 +139,7 @@ const Home = () => {
               <img
                 src="/logo.png"
                 alt="חזון יוסף"
-                className="h-32 w-auto mx-auto logo-image"
+                className="h-32 w-auto mx-auto"
               />
             </div>
             
