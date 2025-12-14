@@ -9,11 +9,13 @@ import AdminSiteContent from '../admin/AdminSiteContent'
 import AdminFooter from '../admin/AdminFooter'
 import AdminSiteSettings from '../admin/AdminSiteSettings'
 import AdminContactPage from '../admin/AdminContactPage'
+import { useColors } from '../contexts/ColorContext'
 
 const Admin = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const location = useLocation()
+  const { colorsLoaded } = useColors()
 
   useEffect(() => {
     console.log('🔐 Initializing Netlify Identity...')
@@ -106,7 +108,7 @@ const Admin = () => {
     }
   }
 
-  if (loading) {
+  if (loading || !colorsLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="spinner"></div>

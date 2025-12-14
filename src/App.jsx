@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -9,53 +9,17 @@ import Newsletter from './pages/Newsletter'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
-import { fetchFromFirebase } from './utils/api'
-import { applyColorsToCSS } from './utils/colorUtils'
+import { ColorProvider, useColors } from './contexts/ColorContext'
 
-function App() {
-  const [colorsLoaded, setColorsLoaded] = useState(false)
+function AppContent() {
+  const { colorsLoaded } = useColors()
 
   useEffect(() => {
     // Initialize Netlify Identity
     if (window.netlifyIdentity) {
       window.netlifyIdentity.init()
     }
-
-    // Load and apply color settings
-    loadColorSettings()
   }, [])
-
-  const loadColorSettings = async () => {
-    // First, apply colors from localStorage synchronously (if available)
-    // This prevents the flash since it happens before render
-    const saved = localStorage.getItem('siteSettings')
-    if (saved) {
-      try {
-        const settings = JSON.parse(saved)
-        if (settings.colors) {
-          console.log('🎨 Applying colors from localStorage (sync)')
-          applyColorsToCSS(settings.colors)
-        }
-      } catch (error) {
-        console.error('Error parsing localStorage settings:', error)
-      }
-    }
-    
-    // Mark colors as loaded so UI can render
-    setColorsLoaded(true)
-
-    // Then, fetch from Firebase in the background to get latest colors
-    try {
-      const data = await fetchFromFirebase('firebase-settings')
-      if (data.settings?.colors) {
-        console.log('🎨 Updating colors from Firebase:', data.settings.colors)
-        applyColorsToCSS(data.settings.colors)
-        localStorage.setItem('siteSettings', JSON.stringify(data.settings))
-      }
-    } catch (error) {
-      console.log('📦 Using localStorage colors (Firebase unavailable)')
-    }
-  }
 
   // Show loading spinner until colors are loaded
   if (!colorsLoaded) {
@@ -84,6 +48,14 @@ function App() {
         <Footer />
       </div>
     </Router>
+  )
+}
+
+function App() {
+  return (
+    <ColorProvider>
+      <AppContent />
+    </ColorProvider>
   )
 }
 
