@@ -142,9 +142,59 @@
               
               console.log('🎨 Colors preloaded from localStorage');
             }
+            
+            // Preload font
+            if (settings.font) {
+              const fontMap = {
+                'Assistant': 'Assistant, sans-serif',
+                'Rubik': 'Rubik, sans-serif',
+                'Heebo': 'Heebo, sans-serif',
+                'Varela Round': 'Varela Round, sans-serif',
+                'Alef': 'Alef, sans-serif',
+                'Open Sans': 'Open Sans, sans-serif',
+                'Secular One': 'Secular One, sans-serif',
+                'Arimo': 'Arimo, sans-serif',
+                'Frank Ruhl Libre': 'Frank Ruhl Libre, serif',
+                'Tinos': 'Tinos, serif'
+              };
+              
+              const googleFontMap = {
+                'Assistant': 'Assistant:wght@300;400;500;600;700;800',
+                'Rubik': 'Rubik:wght@300;400;500;600;700;800;900',
+                'Heebo': 'Heebo:wght@100;200;300;400;500;600;700;800;900',
+                'Varela Round': 'Varela+Round',
+                'Alef': 'Alef:wght@400;700',
+                'Open Sans': 'Open+Sans:wght@300;400;500;600;700;800',
+                'Secular One': 'Secular+One',
+                'Arimo': 'Arimo:wght@400;500;600;700',
+                'Frank Ruhl Libre': 'Frank+Ruhl+Libre:wght@300;400;500;700;900',
+                'Tinos': 'Tinos:wght@400;700'
+              };
+              
+              const fontValue = fontMap[settings.font];
+              const googleFont = googleFontMap[settings.font];
+              
+              if (fontValue && googleFont) {
+                // Load Google Font
+                const existingLink = document.getElementById('preload-font-link');
+                if (existingLink) {
+                  existingLink.remove();
+                }
+                
+                const link = document.createElement('link');
+                link.id = 'preload-font-link';
+                link.rel = 'stylesheet';
+                link.href = `https://fonts.googleapis.com/css2?family=${googleFont}&display=swap`;
+                document.head.appendChild(link);
+                
+                // Apply font immediately
+                document.documentElement.style.setProperty('--font-family', fontValue);
+                console.log('🔤 Font preloaded from localStorage:', settings.font);
+              }
+            }
           }
         } catch (error) {
-          console.error('Error preloading colors:', error);
+          console.error('Error preloading settings:', error);
         }
       })();
     </script>
