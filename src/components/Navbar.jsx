@@ -37,7 +37,7 @@ const Navbar = () => {
               className="h-12 w-auto"
             />
             <div className="hidden md:block">
-              <h1 className="text-lg font-bold text-indigo-900">
+              <h1 className="text-lg font-bold text-primary-900">
                 בית המדרש "חזון יוסף"
               </h1>
               <p className="text-sm text-slate-600">שיכון ג' והסביבה</p>
@@ -54,8 +54,8 @@ const Navbar = () => {
                   to={link.path}
                   className={`flex items-center gap-2 px-4 py-2 rounded transition-colors ${
                     isActive(link.path)
-                      ? 'bg-indigo-900 text-white'
-                      : 'text-slate-700 hover:bg-indigo-50'
+                      ? 'bg-primary-600 text-white'
+                      : 'text-slate-700 hover:bg-primary-50'
                   }`}
                 >
                   <Icon size={16} />
@@ -95,8 +95,8 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-2 px-4 py-3 rounded transition-colors ${
                       isActive(link.path)
-                        ? 'bg-indigo-900 text-white'
-                        : 'text-slate-700 hover:bg-indigo-50'
+                        ? 'bg-primary-600 text-white'
+                        : 'text-slate-700 hover:bg-primary-50'
                     }`}
                   >
                     <Icon size={18} />

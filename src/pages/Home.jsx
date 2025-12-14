@@ -120,7 +120,7 @@ const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-indigo-50/30 to-slate-50 border-b border-slate-200 py-20 overflow-hidden">
+      <section className="relative bg-gradient-to-b from-primary-50/30 to-slate-50 border-b border-slate-200 py-20 overflow-hidden">
         {/* Background Image with Black & White Filter */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -153,11 +153,11 @@ const Home = () => {
               {content.hero.address}
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/prayer-times" className="bg-primary-900 hover:bg-primary-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+              <Link to="/prayer-times" className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
                 <Clock size={20} />
                 זמני תפילות
               </Link>
-              <Link to="/contact" className="border-2 border-primary-900 hover:bg-primary-900 text-primary-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+              <Link to="/contact" className="border-2 border-primary-600 hover:bg-primary-600 text-primary-600 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
                 <Phone size={20} />
                 צור קשר
               </Link>
@@ -169,7 +169,7 @@ const Home = () => {
       {/* About Section */}
       <section className="py-20 bg-slate-50 border-b border-slate-200">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-8 text-center">{content.about.title}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-900 mb-8 text-center">{content.about.title}</h2>
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <p className="text-lg text-slate-700 leading-relaxed">
               {content.about.paragraph1}
@@ -188,21 +188,21 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {content.features.items.map((item, index) => {
               const Icon = getIcon(item.icon)
-              const isIndigo = index % 2 === 0
+              const isPrimary = index % 2 === 0
               return (
-                <div key={item.id} className={isIndigo 
+                <div key={item.id} className={isPrimary 
                   ? 'card text-center border-r-4 border-primary-600 hover:shadow-lg hover:shadow-primary-100 transition-all'
                   : 'card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all'
                 }>
                   <div className="mb-6">
-                    <div className={isIndigo 
+                    <div className={isPrimary 
                       ? 'w-16 h-16 bg-primary-100 flex items-center justify-center mx-auto rounded-lg'
                       : 'w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg'
                     }>
-                      <Icon className={isIndigo ? 'text-primary-700' : 'text-teal-700'} size={32} />
+                      <Icon className={isPrimary ? 'text-primary-700' : 'text-teal-700'} size={32} />
                     </div>
                   </div>
-                  <h3 className={isIndigo ? 'text-xl font-bold mb-3 text-primary-900' : 'text-xl font-bold mb-3 text-teal-900'}>
+                  <h3 className={isPrimary ? 'text-xl font-bold mb-3 text-primary-900' : 'text-xl font-bold mb-3 text-teal-900'}>
                     {item.title}
                   </h3>
                   <p className="text-slate-600 leading-relaxed">
@@ -225,13 +225,13 @@ const Home = () => {
             {content.cta.description}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/newsletter" className="bg-primary-900 hover:bg-primary-950 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
+            <Link to="/newsletter" className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2">
               <Mail size={20} />
               הרשמה לרשימת תפוצה
             </Link>
             <Link
               to="/contact"
-              className="border-2 border-primary-900 hover:bg-primary-900 text-primary-900 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2"
+              className="border-2 border-primary-600 hover:bg-primary-600 text-primary-600 hover:text-white font-medium py-3 px-8 rounded transition-colors flex items-center gap-2"
             >
               <Phone size={20} />
               צור קשר

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -13,6 +13,8 @@ import { fetchFromFirebase } from './utils/api'
 import { applyColorsToCSS } from './utils/colorUtils'
 
 function App() {
+  const [colorsLoaded, setColorsLoaded] = useState(false)
+
   useEffect(() => {
     // Initialize Netlify Identity
     if (window.netlifyIdentity) {
@@ -24,25 +26,44 @@ function App() {
   }, [])
 
   const loadColorSettings = async () => {
+    // First, apply colors from localStorage synchronously (if available)
+    // This prevents the flash since it happens before render
+    const saved = localStorage.getItem('siteSettings')
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved)
+        if (settings.colors) {
+          console.log('🎨 Applying colors from localStorage (sync)')
+          applyColorsToCSS(settings.colors)
+        }
+      } catch (error) {
+        console.error('Error parsing localStorage settings:', error)
+      }
+    }
+    
+    // Mark colors as loaded so UI can render
+    setColorsLoaded(true)
+
+    // Then, fetch from Firebase in the background to get latest colors
     try {
-      // Try to load from Firebase
       const data = await fetchFromFirebase('firebase-settings')
       if (data.settings?.colors) {
-        console.log('🎨 Applying colors from Firebase:', data.settings.colors)
+        console.log('🎨 Updating colors from Firebase:', data.settings.colors)
         applyColorsToCSS(data.settings.colors)
         localStorage.setItem('siteSettings', JSON.stringify(data.settings))
       }
     } catch (error) {
-      // Fallback to localStorage
-      console.log('📦 Loading colors from localStorage fallback')
-      const saved = localStorage.getItem('siteSettings')
-      if (saved) {
-        const settings = JSON.parse(saved)
-        if (settings.colors) {
-          applyColorsToCSS(settings.colors)
-        }
-      }
+      console.log('📦 Using localStorage colors (Firebase unavailable)')
     }
+  }
+
+  // Show loading spinner until colors are loaded
+  if (!colorsLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="spinner"></div>
+      </div>
+    )
   }
 
   return (
