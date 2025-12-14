@@ -118,7 +118,7 @@ const Home = () => {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-b from-primary-50/30 to-slate-50 border-b border-slate-200 py-20 overflow-hidden">
         {/* Background Image with Black & White Filter */}
