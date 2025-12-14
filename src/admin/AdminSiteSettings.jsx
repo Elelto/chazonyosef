@@ -35,6 +35,7 @@ const AdminSiteSettings = () => {
   const [message, setMessage] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
   const [showColorSection, setShowColorSection] = useState('editor')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadSettings()
@@ -47,22 +48,39 @@ const AdminSiteSettings = () => {
   }, [settings.colors])
 
   const loadSettings = async () => {
+    // First, load from localStorage synchronously to prevent flash
+    const saved = localStorage.getItem('siteSettings')
+    if (saved) {
+      try {
+        const cachedSettings = JSON.parse(saved)
+        console.log('🎨 Loading settings from localStorage (sync)')
+        setSettings(cachedSettings)
+        if (cachedSettings.colors) {
+          applyColorsToCSS(cachedSettings.colors)
+        }
+      } catch (error) {
+        console.error('Error parsing localStorage settings:', error)
+      }
+    }
+    
+    // Mark as loaded so UI can render
+    setLoading(false)
+    
+    // Then fetch from Firebase in the background
     try {
-      console.log('📥 Loading site settings...')
+      console.log('📥 Loading site settings from Firebase...')
       const data = await fetchFromFirebase('firebase-settings')
       
       if (data.settings) {
-        console.log('✅ Site settings loaded:', data.settings)
+        console.log('✅ Site settings loaded from Firebase:', data.settings)
         setSettings(data.settings)
         localStorage.setItem('siteSettings', JSON.stringify(data.settings))
+        if (data.settings.colors) {
+          applyColorsToCSS(data.settings.colors)
+        }
       }
     } catch (error) {
-      console.error('❌ Error loading site settings:', error)
-      const saved = localStorage.getItem('siteSettings')
-      if (saved) {
-        console.log('📦 Loaded from localStorage fallback')
-        setSettings(JSON.parse(saved))
-      }
+      console.error('❌ Error loading site settings from Firebase:', error)
     }
   }
 
@@ -130,6 +148,14 @@ const AdminSiteSettings = () => {
     setHasChanges(true)
     setMessage('✨ ערכת הצבעים הוחלה בהצלחה!')
     setTimeout(() => setMessage(''), 3000)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="spinner"></div>
+      </div>
+    )
   }
 
   return (

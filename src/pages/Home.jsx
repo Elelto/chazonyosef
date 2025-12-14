@@ -192,17 +192,17 @@ const Home = () => {
               return (
                 <div key={item.id} className={isPrimary 
                   ? 'card text-center border-r-4 border-primary-600 hover:shadow-lg hover:shadow-primary-100 transition-all'
-                  : 'card text-center border-r-4 border-teal-600 hover:shadow-lg hover:shadow-teal-100 transition-all'
+                  : 'card text-center border-r-4 border-secondary-600 hover:shadow-lg hover:shadow-secondary-100 transition-all'
                 }>
                   <div className="mb-6">
                     <div className={isPrimary 
                       ? 'w-16 h-16 bg-primary-100 flex items-center justify-center mx-auto rounded-lg'
-                      : 'w-16 h-16 bg-teal-100 flex items-center justify-center mx-auto rounded-lg'
+                      : 'w-16 h-16 bg-secondary-100 flex items-center justify-center mx-auto rounded-lg'
                     }>
-                      <Icon className={isPrimary ? 'text-primary-700' : 'text-teal-700'} size={32} />
+                      <Icon className={isPrimary ? 'text-primary-700' : 'text-secondary-700'} size={32} />
                     </div>
                   </div>
-                  <h3 className={isPrimary ? 'text-xl font-bold mb-3 text-primary-900' : 'text-xl font-bold mb-3 text-teal-900'}>
+                  <h3 className={isPrimary ? 'text-xl font-bold mb-3 text-primary-900' : 'text-xl font-bold mb-3 text-secondary-900'}>
                     {item.title}
                   </h3>
                   <p className="text-slate-600 leading-relaxed">
@@ -256,12 +256,12 @@ const Home = () => {
             </Link>
             <Link
               to="/gallery"
-              className="card text-center hover:border-teal-300 hover:shadow-lg hover:shadow-teal-100 transition-all border-t-4 border-t-teal-600"
+              className="card text-center hover:border-secondary-300 hover:shadow-lg hover:shadow-secondary-100 transition-all border-t-4 border-t-secondary-600"
             >
-              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Image className="text-teal-700" size={28} />
+              <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Image className="text-secondary-700" size={28} />
               </div>
-              <h3 className="text-base font-bold text-teal-900">גלריה</h3>
+              <h3 className="text-base font-bold text-secondary-900">גלריה</h3>
             </Link>
             <Link
               to="/newsletter"
@@ -274,12 +274,12 @@ const Home = () => {
             </Link>
             <Link
               to="/contact"
-              className="card text-center hover:border-teal-300 hover:shadow-lg hover:shadow-teal-100 transition-all border-t-4 border-t-teal-600"
+              className="card text-center hover:border-secondary-300 hover:shadow-lg hover:shadow-secondary-100 transition-all border-t-4 border-t-secondary-600"
             >
-              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Phone className="text-teal-700" size={28} />
+              <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Phone className="text-secondary-700" size={28} />
               </div>
-              <h3 className="text-base font-bold text-teal-900">צור קשר</h3>
+              <h3 className="text-base font-bold text-secondary-900">צור קשר</h3>
             </Link>
           </div>
         </div>
