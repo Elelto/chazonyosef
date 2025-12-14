@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    /* Font Family */
+    --font-family: 'Assistant', sans-serif;
+    
     /* Primary Color Shades - RGB format for Tailwind */
     --color-primary: 79 70 229;
     --color-primary-50: 238 242 255;
@@ -45,7 +48,8 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans;
+    @apply bg-slate-50 text-slate-900;
+    font-family: var(--font-family);
     direction: rtl;
   }
 

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Settings, Save, RotateCcw, Palette } from 'lucide-react'
+import { Settings, Save, RotateCcw, Palette, Type } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 import ColorPicker from '../components/ColorPicker'
 import AccessibilityChecker from '../components/AccessibilityChecker'
 import ColorPresetManager from '../components/ColorPresetManager'
 import { applyColorsToCSS } from '../utils/colorUtils'
+import { AVAILABLE_FONTS, applyFont } from '../utils/fontUtils'
 
 const AdminSiteSettings = () => {
   const [settings, setSettings] = useState({
@@ -23,6 +24,7 @@ const AdminSiteSettings = () => {
       secondary: '#0d9488',
       accent: '#d97706'
     },
+    font: 'Assistant',
     social: {
       facebook: '',
       whatsapp: '',
@@ -46,6 +48,12 @@ const AdminSiteSettings = () => {
       applyColorsToCSS(settings.colors)
     }
   }, [settings.colors])
+
+  useEffect(() => {
+    if (settings.font) {
+      applyFont(settings.font)
+    }
+  }, [settings.font])
 
   const loadSettings = async () => {
     // First, load from localStorage synchronously to prevent flash
@@ -273,6 +281,71 @@ const AdminSiteSettings = () => {
                 placeholder="בית מדרש, חזון יוסף, בני ברק..."
               />
               <p className="text-sm text-slate-500 mt-1">הפרד מילות מפתח בפסיקים</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Font Settings */}
+        <div className="mb-8 p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Type className="text-primary-600" size={28} />
+            בחירת גופן לאתר
+          </h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-blue-800 text-sm">
+              ✨ <strong>בחר גופן:</strong> כל הגופנים תומכים בעברית ויוחלו באופן מיידי על כל האתר.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {AVAILABLE_FONTS.map((font) => (
+                <button
+                  key={font.name}
+                  type="button"
+                  onClick={() => {
+                    setSettings(prev => ({ ...prev, font: font.name }))
+                    setHasChanges(true)
+                  }}
+                  className={`p-4 rounded-lg border-2 transition-all text-right ${
+                    settings.font === font.name
+                      ? 'border-primary-600 bg-primary-50 shadow-md'
+                      : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                  }`}
+                  style={{ fontFamily: font.value }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-lg">{font.name}</span>
+                    {settings.font === font.name && (
+                      <span className="text-primary-600 text-xl">✓</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-600 mb-2">{font.category}</p>
+                  <p className="text-base" style={{ fontFamily: font.value }}>
+                    דוגמה: בית המדרש חזון יוסף
+                  </p>
+                  <p className="text-sm mt-1" style={{ fontFamily: font.value }}>
+                    ABCabc 123
+                  </p>
+                </button>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h4 className="font-bold text-slate-800 mb-3">תצוגה מקדימה של הגופן הנבחר:</h4>
+              <div 
+                className="p-6 bg-white rounded-lg border-2 border-primary-200"
+                style={{ fontFamily: AVAILABLE_FONTS.find(f => f.name === settings.font)?.value }}
+              >
+                <h1 className="text-3xl font-bold mb-3">בית המדרש "חזון יוסף"</h1>
+                <h2 className="text-2xl font-semibold mb-3">שיכון ג' בני ברק</h2>
+                <p className="text-lg mb-2">
+                  ברוכים הבאים לבית המדרש שלנו. כאן תוכלו למצוא מידע על זמני תפילות, שיעורים ואירועים.
+                </p>
+                <p className="text-base">
+                  English text: Welcome to our Beit Midrash. Here you can find information about prayer times, classes and events.
+                </p>
+              </div>
             </div>
           </div>
         </div>
