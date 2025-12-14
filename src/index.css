@@ -122,19 +122,6 @@
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-@keyframes pageLoad {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-body {
-  animation: pageLoad 0.3s ease-in;
-}
-
 /* Loading spinner */
 .spinner {
   border: 3px solid #f3f4f6;
