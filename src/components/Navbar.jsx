@@ -34,7 +34,8 @@ const Navbar = () => {
             <img
               src="/logo.png"
               alt="חזון יוסף"
-              className="h-12 w-auto"
+              className="h-12 w-auto loaded"
+              onLoad={(e) => e.target.classList.add('loaded')}
             />
             <div className="hidden md:block">
               <h1 className="text-lg font-bold text-primary-900">
