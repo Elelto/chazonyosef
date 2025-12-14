@@ -139,8 +139,7 @@ const Home = () => {
               <img
                 src="/logo.png"
                 alt="חזון יוסף"
-                className="h-32 w-auto mx-auto loaded"
-                onLoad={(e) => e.target.classList.add('loaded')}
+                className="h-32 w-auto mx-auto logo-image"
               />
             </div>
             
