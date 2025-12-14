@@ -66,6 +66,9 @@ const AdminSiteSettings = () => {
         if (cachedSettings.colors) {
           applyColorsToCSS(cachedSettings.colors)
         }
+        if (cachedSettings.font) {
+          applyFont(cachedSettings.font)
+        }
       } catch (error) {
         console.error('Error parsing localStorage settings:', error)
       }
@@ -85,6 +88,9 @@ const AdminSiteSettings = () => {
         localStorage.setItem('siteSettings', JSON.stringify(data.settings))
         if (data.settings.colors) {
           applyColorsToCSS(data.settings.colors)
+        }
+        if (data.settings.font) {
+          applyFont(data.settings.font)
         }
       }
     } catch (error) {
