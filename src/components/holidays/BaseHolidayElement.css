@@ -1,0 +1,107 @@
+.holiday-element-container {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 999;
+  animation: fadeIn 1.5s ease-out;
+  width: 300px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+}
+
+.holiday-element-container.preview {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  animation: none;
+  margin: 0 auto;
+}
+
+.holiday-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.holiday-svg {
+  width: 100%;
+  height: auto;
+}
+
+.holiday-label {
+  margin-top: 15px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  pointer-events: auto;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px);
+  transition: transform 0.3s ease;
+}
+
+.holiday-label:hover {
+  transform: translateY(-2px);
+}
+
+.holiday-text {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  font-family: 'Assistant', sans-serif;
+}
+
+/* Elegant Animations */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gentleSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes softGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
+  50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)); }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes bloom {
+  0% { transform: scale(0.98); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(0.98); }
+}
+
+/* Specific Element Classes */
+.animate-sway { animation: gentleSway 6s ease-in-out infinite; transform-origin: bottom center; }
+.animate-float { animation: subtleFloat 5s ease-in-out infinite; }
+.animate-glow { animation: softGlow 4s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 3s ease-in-out infinite; }
+.animate-bloom { animation: bloom 5s ease-in-out infinite; transform-origin: center; }
+
+@media (max-width: 768px) {
+  .holiday-element-container {
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    width: 250px;
+  }
+}

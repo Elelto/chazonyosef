@@ -1,0 +1,132 @@
+.menorah-container {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 999;
+  animation: fadeIn 1.5s ease-out;
+  width: 350px;
+  height: auto;
+  pointer-events: none; /* Let clicks pass through to site */
+}
+
+.menorah-container.preview {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  animation: none;
+  margin: 0 auto;
+}
+
+.menorah-svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.25));
+  pointer-events: auto; /* Enable tooltips/clicks on menorah if needed */
+}
+
+.flames-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.flame-position {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.flame {
+  position: relative;
+  width: 18px;
+  height: 30px;
+  margin-bottom: -4px;
+  animation: gentleFlicker 3s ease-in-out infinite;
+  filter: blur(0.5px);
+}
+
+.flame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 30px;
+  background: radial-gradient(ellipse at center bottom, 
+    rgba(255, 250, 240, 1) 0%,
+    rgba(255, 245, 220, 1) 15%,
+    rgba(255, 220, 150, 0.9) 35%,
+    rgba(255, 180, 100, 0.7) 55%,
+    rgba(255, 140, 60, 0.5) 75%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 
+    0 0 10px rgba(255, 235, 180, 0.4),
+    0 0 20px rgba(255, 200, 120, 0.2);
+}
+
+.flame-inner {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 16px;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 250, 1) 0%,
+    rgba(255, 250, 220, 0.9) 30%,
+    rgba(255, 235, 180, 0.6) 60%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: gentleFlickerInner 2.5s ease-in-out infinite;
+}
+
+.chanukah-day-label {
+  margin-top: 15px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  pointer-events: auto;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.day-text {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+@keyframes gentleFlicker {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 1; }
+  33% { transform: scale(1.02) translateY(-1px); opacity: 0.95; }
+  66% { transform: scale(0.98) translateY(0.5px); opacity: 0.98; }
+}
+
+@keyframes gentleFlickerInner {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  50% { transform: translateX(-50%) scale(1.05); opacity: 0.9; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .menorah-container {
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    width: 300px;
+  }
+}

@@ -7,6 +7,7 @@ import ColorPresetManager from '../components/ColorPresetManager'
 import { applyColorsToCSS } from '../utils/colorUtils'
 import { AVAILABLE_FONTS, applyFont } from '../utils/fontUtils'
 import { applyGradient, applyButtonGradient } from '../utils/gradientUtils'
+import { GRADIENT_PRESETS } from '../utils/gradientPresets'
 
 const AdminSiteSettings = () => {
   const [settings, setSettings] = useState({
@@ -205,6 +206,25 @@ const AdminSiteSettings = () => {
       }
     }))
     setHasChanges(true)
+  }
+
+  const applyGradientPreset = (preset) => {
+    setSettings(prev => ({
+      ...prev,
+      gradient: {
+        ...prev.gradient,
+        colors: preset.background.colors,
+        direction: preset.background.direction
+      },
+      buttonGradient: {
+        ...prev.buttonGradient,
+        colors: preset.button.colors,
+        direction: preset.button.direction
+      }
+    }))
+    setHasChanges(true)
+    setMessage(`✨ תבנית "${preset.name}" הוחלה בהצלחה!`)
+    setTimeout(() => setMessage(''), 3000)
   }
 
   const applyPreset = (preset) => {
@@ -630,6 +650,45 @@ const AdminSiteSettings = () => {
 
             {settings.gradient?.enabled && (
               <div className="space-y-6 animate-fade-in">
+                {/* Gradient Presets */}
+                <div className="border-2 border-purple-200 rounded-lg p-6 bg-gradient-to-br from-purple-50 to-white">
+                  <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <Palette size={20} className="text-purple-600" />
+                    תבניות מוכנות
+                  </h4>
+                  <p className="text-sm text-slate-600 mb-4">בחר תבנית מעוצבת והחל אותה על הרקע והכפתורים בלחיצה אחת</p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {GRADIENT_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => applyGradientPreset(preset)}
+                        className="group relative overflow-hidden rounded-lg border-2 border-slate-200 hover:border-purple-400 transition-all hover:scale-105 hover:shadow-lg"
+                        title={preset.description}
+                      >
+                        <div
+                          className="h-24 w-full"
+                          style={{
+                            background: `linear-gradient(${preset.background.direction}, ${preset.background.colors.join(', ')})`
+                          }}
+                        ></div>
+                        <div className="p-2 bg-white">
+                          <p className="text-sm font-bold text-slate-800 text-center">{preset.name}</p>
+                          <p className="text-xs text-slate-500 text-center">{preset.description}</p>
+                        </div>
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800">
+                      💡 <strong>טיפ:</strong> לחיצה על תבנית תחליף את הצבעים של הרקע והכפתורים. אל תשכח לשמור!
+                    </p>
+                  </div>
+                </div>
+
                 {/* Multiple Colors */}
                 <div>
                   <label className="block text-slate-700 font-bold mb-3">צבעי הגרדיאנט</label>

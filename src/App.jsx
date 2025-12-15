@@ -11,6 +11,7 @@ import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import { ColorProvider, useColors } from './contexts/ColorContext'
 import { FontProvider, useFonts } from './contexts/FontContext'
+import HolidayElementManager from './components/HolidayElementManager'
 
 function AppContent() {
   const { colorsLoaded } = useColors()
@@ -35,6 +36,7 @@ function AppContent() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        <HolidayElementManager />
         <Navbar />
         <main className="flex-grow">
           <Routes>
