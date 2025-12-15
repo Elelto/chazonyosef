@@ -6,6 +6,7 @@ import AccessibilityChecker from '../components/AccessibilityChecker'
 import ColorPresetManager from '../components/ColorPresetManager'
 import { applyColorsToCSS } from '../utils/colorUtils'
 import { AVAILABLE_FONTS, applyFont } from '../utils/fontUtils'
+import { applyGradient, applyButtonGradient } from '../utils/gradientUtils'
 
 const AdminSiteSettings = () => {
   const [settings, setSettings] = useState({
@@ -23,6 +24,16 @@ const AdminSiteSettings = () => {
       primary: '#4f46e5',
       secondary: '#0d9488',
       accent: '#d97706'
+    },
+    gradient: {
+      enabled: false,
+      colors: ['#1e3a8a', '#4c1d95', '#7c3aed'],
+      direction: 'to right'
+    },
+    buttonGradient: {
+      enabled: false,
+      colors: ['#4f46e5', '#7c3aed'],
+      direction: 'to right'
     },
     font: 'Assistant',
     social: {
@@ -55,6 +66,18 @@ const AdminSiteSettings = () => {
     }
   }, [settings.font])
 
+  useEffect(() => {
+    if (settings.gradient) {
+      applyGradient(settings.gradient)
+    }
+  }, [settings.gradient])
+
+  useEffect(() => {
+    if (settings.buttonGradient) {
+      applyButtonGradient(settings.buttonGradient)
+    }
+  }, [settings.buttonGradient])
+
   const loadSettings = async () => {
     // First, load from localStorage synchronously to prevent flash
     const saved = localStorage.getItem('siteSettings')
@@ -68,6 +91,12 @@ const AdminSiteSettings = () => {
         }
         if (cachedSettings.font) {
           applyFont(cachedSettings.font)
+        }
+        if (cachedSettings.gradient) {
+          applyGradient(cachedSettings.gradient)
+        }
+        if (cachedSettings.buttonGradient) {
+          applyButtonGradient(cachedSettings.buttonGradient)
         }
       } catch (error) {
         console.error('Error parsing localStorage settings:', error)
@@ -91,6 +120,12 @@ const AdminSiteSettings = () => {
         }
         if (data.settings.font) {
           applyFont(data.settings.font)
+        }
+        if (data.settings.gradient) {
+          applyGradient(data.settings.gradient)
+        }
+        if (data.settings.buttonGradient) {
+          applyButtonGradient(data.settings.buttonGradient)
         }
       }
     } catch (error) {
@@ -145,6 +180,28 @@ const AdminSiteSettings = () => {
       colors: {
         ...prev.colors,
         [colorType]: value
+      }
+    }))
+    setHasChanges(true)
+  }
+
+  const updateGradient = (field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      gradient: {
+        ...prev.gradient,
+        [field]: value
+      }
+    }))
+    setHasChanges(true)
+  }
+
+  const updateButtonGradient = (field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      buttonGradient: {
+        ...prev.buttonGradient,
+        [field]: value
       }
     }))
     setHasChanges(true)
@@ -534,6 +591,265 @@ const AdminSiteSettings = () => {
                     <h4 className="text-lg font-bold text-slate-800 mb-4">צבע הדגשה</h4>
                     <AccessibilityChecker foreground={settings.colors.accent} />
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Gradient Background Settings */}
+        <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Palette className="text-purple-600" size={28} />
+            רקע גרדיאנט (מעבר צבעים)
+          </h3>
+          
+          <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <p className="text-purple-800 text-sm">
+                ✨ <strong>אפקט גרדיאנט:</strong> הוסף מעבר צבעים יפהפה לרקע האתר. השינויים יוחלו באופן מיידי!
+              </p>
+            </div>
+
+            {/* Enable/Disable Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div>
+                <h4 className="font-bold text-slate-800">הפעל רקע גרדיאנט</h4>
+                <p className="text-sm text-slate-600">הצג מעבר צבעים ברקע האתר</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.gradient?.enabled || false}
+                  onChange={(e) => updateGradient('enabled', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:right-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            {settings.gradient?.enabled && (
+              <div className="space-y-6 animate-fade-in">
+                {/* Multiple Colors */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-3">צבעי הגרדיאנט</label>
+                  <p className="text-sm text-slate-600 mb-4">הוסף עד 4 צבעים למעבר חלק ומרשים</p>
+                  
+                  {(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed']).map((color, index) => (
+                    <div key={index} className="flex items-center gap-4 mb-4">
+                      <span className="text-sm font-medium text-slate-700 w-20">צבע {index + 1}</span>
+                      <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => {
+                          const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
+                          newColors[index] = e.target.value
+                          updateGradient('colors', newColors)
+                        }}
+                        className="w-20 h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={color}
+                        onChange={(e) => {
+                          const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
+                          newColors[index] = e.target.value
+                          updateGradient('colors', newColors)
+                        }}
+                        className="input-field flex-1"
+                        placeholder="#1e3a8a"
+                      />
+                      {(settings.gradient?.colors || []).length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newColors = (settings.gradient?.colors || []).filter((_, i) => i !== index)
+                            updateGradient('colors', newColors)
+                          }}
+                          className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {(settings.gradient?.colors || []).length < 4 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed']), '#ec4899']
+                        updateGradient('colors', newColors)
+                      }}
+                      className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                    >
+                      + הוסף צבע
+                    </button>
+                  )}
+                </div>
+
+                {/* Direction */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-3">כיוון הגרדיאנט</label>
+                  <select
+                    value={settings.gradient?.direction || 'to right'}
+                    onChange={(e) => updateGradient('direction', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="to right">שמאל לימין ←</option>
+                    <option value="to left">ימין לשמאל →</option>
+                    <option value="to bottom">למעלה למטה ↓</option>
+                    <option value="to top">למטה למעלה ↑</option>
+                    <option value="to bottom right">אלכסון ↘</option>
+                    <option value="to bottom left">אלכסון ↙</option>
+                    <option value="to top right">אלכסון ↗</option>
+                    <option value="to top left">אלכסון ↖</option>
+                  </select>
+                </div>
+
+                {/* Preview */}
+                <div className="border-2 border-purple-300 rounded-lg p-6">
+                  <h4 className="text-lg font-bold text-slate-800 mb-4">תצוגה מקדימה</h4>
+                  <div
+                    className="w-full h-40 rounded-lg shadow-lg"
+                    style={{
+                      background: `linear-gradient(${settings.gradient?.direction || 'to right'}, ${(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed']).join(', ')})`
+                    }}
+                  ></div>
+                  <p className="text-sm text-slate-600 mt-3 text-center">
+                    כך ייראה הרקע באתר
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Button Gradient Settings */}
+        <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Palette className="text-blue-600" size={28} />
+            גרדיאנט לכפתורים
+          </h3>
+          
+          <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 text-sm">
+                ✨ <strong>גרדיאנט לכפתורים:</strong> הוסף מעבר צבעים מיוחד לכפתורים באתר. יוחל על כל הכפתורים הראשיים.
+              </p>
+            </div>
+
+            {/* Enable/Disable Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div>
+                <h4 className="font-bold text-slate-800">הפעל גרדיאנט לכפתורים</h4>
+                <p className="text-sm text-slate-600">החל מעבר צבעים על כל הכפתורים באתר</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.buttonGradient?.enabled || false}
+                  onChange={(e) => updateButtonGradient('enabled', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:right-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {settings.buttonGradient?.enabled && (
+              <div className="space-y-6 animate-fade-in">
+                {/* Multiple Colors */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-3">צבעי הגרדיאנט</label>
+                  <p className="text-sm text-slate-600 mb-4">בחר 2-3 צבעים למעבר חלק בכפתורים</p>
+                  
+                  {(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed']).map((color, index) => (
+                    <div key={index} className="flex items-center gap-4 mb-4">
+                      <span className="text-sm font-medium text-slate-700 w-20">צבע {index + 1}</span>
+                      <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => {
+                          const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
+                          newColors[index] = e.target.value
+                          updateButtonGradient('colors', newColors)
+                        }}
+                        className="w-20 h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={color}
+                        onChange={(e) => {
+                          const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
+                          newColors[index] = e.target.value
+                          updateButtonGradient('colors', newColors)
+                        }}
+                        className="input-field flex-1"
+                        placeholder="#4f46e5"
+                      />
+                      {(settings.buttonGradient?.colors || []).length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newColors = (settings.buttonGradient?.colors || []).filter((_, i) => i !== index)
+                            updateButtonGradient('colors', newColors)
+                          }}
+                          className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {(settings.buttonGradient?.colors || []).length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed']), '#ec4899']
+                        updateButtonGradient('colors', newColors)
+                      }}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      + הוסף צבע
+                    </button>
+                  )}
+                </div>
+
+                {/* Direction */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-3">כיוון הגרדיאנט</label>
+                  <select
+                    value={settings.buttonGradient?.direction || 'to right'}
+                    onChange={(e) => updateButtonGradient('direction', e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="to right">שמאל לימין ←</option>
+                    <option value="to left">ימין לשמאל →</option>
+                    <option value="to bottom">למעלה למטה ↓</option>
+                    <option value="to top">למטה למעלה ↑</option>
+                    <option value="to bottom right">אלכסון ↘</option>
+                    <option value="to bottom left">אלכסון ↙</option>
+                    <option value="to top right">אלכסון ↗</option>
+                    <option value="to top left">אלכסון ↖</option>
+                  </select>
+                </div>
+
+                {/* Preview */}
+                <div className="border-2 border-blue-300 rounded-lg p-6">
+                  <h4 className="text-lg font-bold text-slate-800 mb-4">תצוגה מקדימה</h4>
+                  <button
+                    type="button"
+                    className="w-full py-4 px-6 rounded-lg shadow-lg text-white font-bold text-lg"
+                    style={{
+                      background: `linear-gradient(${settings.buttonGradient?.direction || 'to right'}, ${(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed']).join(', ')})`
+                    }}
+                  >
+                    כפתור לדוגמה
+                  </button>
+                  <p className="text-sm text-slate-600 mt-3 text-center">
+                    כך ייראו הכפתורים באתר
+                  </p>
                 </div>
               </div>
             )}

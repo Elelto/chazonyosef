@@ -146,6 +146,44 @@
               console.log('🎨 Colors preloaded from localStorage');
             }
             
+            // Preload gradient (sync, immediate)
+            if (settings.gradient) {
+              const root = document.documentElement;
+              
+              // Support both old format (startColor/endColor) and new format (colors array)
+              let colors = settings.gradient.colors;
+              if (!colors && settings.gradient.startColor && settings.gradient.endColor) {
+                colors = [settings.gradient.startColor, settings.gradient.endColor];
+              }
+              if (!colors) {
+                colors = ['#1e3a8a', '#4c1d95', '#7c3aed'];
+              }
+              
+              root.style.setProperty('--gradient-colors', colors.join(', '));
+              root.style.setProperty('--gradient-direction', settings.gradient.direction || 'to right');
+              
+              if (settings.gradient.enabled) {
+                document.body.classList.add('gradient-enabled');
+                document.body.style.background = `linear-gradient(${settings.gradient.direction || 'to right'}, ${colors.join(', ')})`;
+                document.body.style.backgroundAttachment = 'fixed';
+                console.log('🌈 Gradient preloaded from localStorage');
+              }
+            }
+            
+            // Preload button gradient (sync, immediate)
+            if (settings.buttonGradient) {
+              const root = document.documentElement;
+              let buttonColors = settings.buttonGradient.colors || ['#4f46e5', '#7c3aed'];
+              
+              root.style.setProperty('--button-gradient-colors', buttonColors.join(', '));
+              root.style.setProperty('--button-gradient-direction', settings.buttonGradient.direction || 'to right');
+              
+              if (settings.buttonGradient.enabled) {
+                document.body.classList.add('button-gradient-enabled');
+                console.log('🎨 Button gradient preloaded from localStorage');
+              }
+            }
+            
             // Preload font (async, non-blocking)
             if (settings.font) {
               const fontMap = {

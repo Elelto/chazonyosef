@@ -22,6 +22,19 @@ const Admin = () => {
   useEffect(() => {
     console.log('🔐 Initializing Netlify Identity...')
     
+    // Development mode bypass for localhost
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    
+    if (isDevelopment) {
+      console.log('🔧 Development mode - bypassing authentication')
+      setUser({ 
+        email: 'dev@localhost',
+        user_metadata: { full_name: 'מפתח' }
+      })
+      setLoading(false)
+      return
+    }
+    
     let initTimeout
     
     // Initialize Netlify Identity

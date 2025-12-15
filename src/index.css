@@ -45,12 +45,28 @@
     --color-accent-700: 180 83 9;
     --color-accent-800: 146 64 14;
     --color-accent-900: 120 53 15;
+
+    /* Gradient Background */
+    --gradient-enabled: 0;
+    --gradient-start: #1e3a8a;
+    --gradient-end: #7c3aed;
+    --gradient-direction: to right;
+    
+    /* Button Gradient */
+    --button-gradient-colors: #4f46e5, #7c3aed;
+    --button-gradient-direction: to right;
   }
 
   body {
     @apply bg-slate-50 text-slate-900;
     font-family: var(--font-family);
     direction: rtl;
+    min-height: 100vh;
+  }
+  
+  body.gradient-enabled {
+    background: linear-gradient(var(--gradient-direction), var(--gradient-start), var(--gradient-end));
+    background-attachment: fixed;
   }
 
   html {
@@ -65,6 +81,18 @@
 
   .btn-primary {
     @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-8 rounded transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+  
+  body.button-gradient-enabled .btn-primary {
+    background: linear-gradient(var(--button-gradient-direction), var(--button-gradient-colors));
+    background-size: 200% 200%;
+    transition: all 0.3s ease;
+  }
+  
+  body.button-gradient-enabled .btn-primary:hover {
+    background-position: right center;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
   }
 
   .btn-secondary {

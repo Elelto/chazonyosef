@@ -4,6 +4,13 @@
  * Get the current user's authentication token
  */
 export const getAuthToken = () => {
+  // Development mode bypass
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  if (isDevelopment) {
+    console.log('🔧 Dev mode: Using mock token')
+    return 'dev-mode-token'
+  }
+  
   const user = window.netlifyIdentity?.currentUser()
   if (!user || !user.token) {
     console.warn('⚠️ No authenticated user or token found')
@@ -90,6 +97,23 @@ export const fetchFromFirebase = async (endpoint) => {
  */
 export const saveToFirebase = async (endpoint, data) => {
   console.log('💾 Saving to Firebase:', endpoint, data)
+  
+  // Development mode: save to localStorage
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  if (isDevelopment) {
+    console.log('🔧 Dev mode: Saving to localStorage instead of Firebase')
+    
+    // Map endpoint to localStorage key
+    const storageKey = endpoint.replace('firebase-', '')
+    
+    if (endpoint === 'firebase-settings') {
+      localStorage.setItem('siteSettings', JSON.stringify(data.settings))
+    } else {
+      localStorage.setItem(storageKey, JSON.stringify(data))
+    }
+    
+    return Promise.resolve({ success: true, message: 'Saved to localStorage' })
+  }
   
   return authenticatedFetch(`/.netlify/functions/${endpoint}`, {
     method: 'POST',
