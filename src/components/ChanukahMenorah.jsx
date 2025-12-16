@@ -23,9 +23,20 @@ export default function ChanukahMenorah({ forceActive = false }) {
 
   if (!isActive) return null
 
-  const Flame = ({ delay = 0 }) => (
-    <div className="flame" style={{ animationDelay: `${delay}s` }}>
-      <div className="flame-inner"></div>
+  const RealisticCandle = ({ isLit, delay = 0 }) => (
+    <div className="realistic-candle-wrapper">
+      <div className="rc-holder">
+        <div className="rc-candle">
+          {isLit && (
+            <>
+              <div className="rc-blinking-glow"></div>
+              <div className="rc-glow"></div>
+              <div className="rc-flame" style={{ animationDelay: `${delay}s` }}></div>
+            </>
+          )}
+          <div className="rc-thread"></div>
+        </div>
+      </div>
     </div>
   )
 
@@ -156,79 +167,42 @@ export default function ChanukahMenorah({ forceActive = false }) {
           <path d="M-8 0 L8 0 L6 12 L-6 12 Z" fill="url(#silverGradient)" />
           <ellipse cx="0" cy="0" rx="8" ry="3" fill="#DCDCDC" stroke="#999" strokeWidth="0.5" />
         </g>
-
-        {/* --- CANDLES (White wax) --- */}
-        {/* Shamash */}
-        <rect x="196" y="120" width="8" height="25" fill="#FDFDFD" />
-        
-        {/* Right Candles */}
-        {/* 1 */}<rect x="286" y="120" width="8" height="25" fill="#FDFDFD" />
-        {/* 2 */}<rect x="266" y="125" width="8" height="25" fill="#FDFDFD" />
-        {/* 3 */}<rect x="246" y="130" width="8" height="25" fill="#FDFDFD" />
-        {/* 4 */}<rect x="226" y="135" width="8" height="25" fill="#FDFDFD" />
-
-        {/* Left Candles */}
-        {/* 5 */}<rect x="166" y="135" width="8" height="25" fill="#FDFDFD" />
-        {/* 6 */}<rect x="146" y="130" width="8" height="25" fill="#FDFDFD" />
-        {/* 7 */}<rect x="126" y="125" width="8" height="25" fill="#FDFDFD" />
-        {/* 8 */}<rect x="106" y="120" width="8" height="25" fill="#FDFDFD" />
-
       </svg>
 
-      {/* --- FLAMES OVERLAY --- */}
+      {/* --- CANDLES OVERLAY --- */}
       <div className="flames-overlay">
         {/* Shamash (Center) - Always lit */}
-        <div className="flame-position" style={{ left: '50%', top: '28%' }}>
-          <Flame delay={0} />
+        <div className="flame-position" style={{ left: '50%', top: '45.3%' }}>
+          <RealisticCandle isLit={true} delay={0} />
         </div>
 
         {/* Right Side (1-4) */}
-        {currentDay >= 1 && (
-        <div className="flame-position" style={{ left: '72.5%', top: '28%' }}> {/* Pos 1 */}
-          <Flame delay={0.1} />
+        <div className="flame-position" style={{ left: '72.5%', top: '45.3%' }}> {/* Pos 1 */}
+          <RealisticCandle isLit={currentDay >= 1} delay={0.1} />
         </div>
-        )}
-        {currentDay >= 2 && (
-        <div className="flame-position" style={{ left: '67.5%', top: '29.5%' }}> {/* Pos 2 */}
-          <Flame delay={0.2} />
+        <div className="flame-position" style={{ left: '67.5%', top: '46.8%' }}> {/* Pos 2 */}
+          <RealisticCandle isLit={currentDay >= 2} delay={0.2} />
         </div>
-        )}
-        {currentDay >= 3 && (
-        <div className="flame-position" style={{ left: '62.5%', top: '31%' }}> {/* Pos 3 */}
-          <Flame delay={0.3} />
+        <div className="flame-position" style={{ left: '62.5%', top: '48.4%' }}> {/* Pos 3 */}
+          <RealisticCandle isLit={currentDay >= 3} delay={0.3} />
         </div>
-        )}
-        {currentDay >= 4 && (
-        <div className="flame-position" style={{ left: '57.5%', top: '32.5%' }}> {/* Pos 4 */}
-          <Flame delay={0.4} />
+        <div className="flame-position" style={{ left: '57.5%', top: '50%' }}> {/* Pos 4 */}
+          <RealisticCandle isLit={currentDay >= 4} delay={0.4} />
         </div>
-        )}
 
         {/* Left Side (5-8) */}
-        {currentDay >= 5 && (
-        <div className="flame-position" style={{ left: '42.5%', top: '32.5%' }}> {/* Pos 5 */}
-          <Flame delay={0.5} />
+        <div className="flame-position" style={{ left: '42.5%', top: '50%' }}> {/* Pos 5 */}
+          <RealisticCandle isLit={currentDay >= 5} delay={0.5} />
         </div>
-        )}
-        {currentDay >= 6 && (
-        <div className="flame-position" style={{ left: '37.5%', top: '31%' }}> {/* Pos 6 */}
-          <Flame delay={0.6} />
+        <div className="flame-position" style={{ left: '37.5%', top: '48.4%' }}> {/* Pos 6 */}
+          <RealisticCandle isLit={currentDay >= 6} delay={0.6} />
         </div>
-        )}
-        {currentDay >= 7 && (
-        <div className="flame-position" style={{ left: '32.5%', top: '29.5%' }}> {/* Pos 7 */}
-          <Flame delay={0.7} />
+        <div className="flame-position" style={{ left: '32.5%', top: '46.8%' }}> {/* Pos 7 */}
+          <RealisticCandle isLit={currentDay >= 7} delay={0.7} />
         </div>
-        )}
-        {currentDay >= 8 && (
-        <div className="flame-position" style={{ left: '27.5%', top: '28%' }}> {/* Pos 8 */}
-          <Flame delay={0.8} />
+        <div className="flame-position" style={{ left: '27.5%', top: '45.3%' }}> {/* Pos 8 */}
+          <RealisticCandle isLit={currentDay >= 8} delay={0.8} />
         </div>
-        )}
-      </div>
-
-      <div className="chanukah-day-label">
-        <span className="day-text">נר {currentDay} של חנוכה</span>
       </div>
     </div>
   )

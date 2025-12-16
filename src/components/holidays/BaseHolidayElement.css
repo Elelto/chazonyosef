@@ -30,32 +30,6 @@
   height: auto;
 }
 
-.holiday-label {
-  margin-top: 15px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 8px 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-  pointer-events: auto;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(5px);
-  transition: transform 0.3s ease;
-}
-
-.holiday-label:hover {
-  transform: translateY(-2px);
-}
-
-.holiday-text {
-  color: #333;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  font-family: 'Assistant', sans-serif;
-}
-
 /* Elegant Animations */
 
 @keyframes fadeIn {
