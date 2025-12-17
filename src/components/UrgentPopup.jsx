@@ -19,11 +19,19 @@ const UrgentPopup = () => {
       const data = await fetchFromFirebase('firebase-popup')
       
       if (data && data.popup && data.popup.isActive) {
-        // Check if we should show it based on ID (if changed) or session
+        // Check if we should show it based on ID (if changed) and session
         const lastSeenId = localStorage.getItem('lastSeenPopupId')
+        const isNewPopup = data.popup.id !== lastSeenId
         
-        // If it's a new popup (different ID) or hasn't been hidden in this session
-        if (data.popup.id !== lastSeenId || !sessionHidden) {
+        // If it's a new popup, clear the session storage
+        if (isNewPopup) {
+          sessionStorage.removeItem('popupHidden')
+        }
+        
+        // Show if it's a new popup OR hasn't been hidden in this session
+        const shouldShow = isNewPopup || !sessionHidden
+        
+        if (shouldShow) {
           setPopup(data.popup)
           // Add a small delay for animation effect
           setTimeout(() => setIsVisible(true), 1000)
