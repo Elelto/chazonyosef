@@ -52,17 +52,25 @@ export const handler = async (event, context) => {
       }
     }
 
-    // Validate file type (only PDF for now)
-    if (contentType !== 'application/pdf') {
+    // Validate file type (images only)
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp'
+    ]
+    
+    if (!allowedTypes.includes(contentType)) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Only PDF files are allowed' })
+        body: JSON.stringify({ error: 'Only image files (JPG, PNG, GIF, WebP) are allowed' })
       }
     }
 
     // Convert base64 to buffer
-    const base64Data = fileData.replace(/^data:application\/pdf;base64,/, '')
+    const base64Data = fileData.replace(/^data:[^;]+;base64,/, '')
     const buffer = Buffer.from(base64Data, 'base64')
 
     // Validate file size (max 5MB)

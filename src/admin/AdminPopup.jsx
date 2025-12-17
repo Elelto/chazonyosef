@@ -44,8 +44,10 @@ const AdminPopup = () => {
     const file = e.target.files[0]
     if (!file) return
 
-    if (file.type !== 'application/pdf') {
-      setMessage('❌ נא להעלות קובץ PDF בלבד')
+    // Allow only image files
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setMessage('❌ נא להעלות תמונה בלבד (JPG, PNG, GIF, WebP)')
       return
     }
 
@@ -153,21 +155,14 @@ const AdminPopup = () => {
 
             {popup.actionUrl && (
               <div className="mb-6 w-full">
-                {popup.actionUrl.endsWith('.pdf') || popup.actionUrl.startsWith('data:application/pdf') ? (
-                  <div className="bg-slate-100 p-4 rounded-lg border-2 border-dashed border-slate-300">
-                    <FileText size={48} className="mx-auto mb-2 text-slate-500" />
-                    <p className="text-sm text-slate-600">קובץ PDF מצורף</p>
-                  </div>
-                ) : (
-                  <img 
-                    src={popup.actionUrl} 
-                    alt={popup.title || 'תמונה'} 
-                    className="w-full max-h-96 object-contain rounded-lg shadow-md"
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                    }}
-                  />
-                )}
+                <img 
+                  src={popup.actionUrl} 
+                  alt={popup.title || 'תמונה'} 
+                  className="w-full max-h-96 object-contain rounded-lg shadow-md"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                  }}
+                />
               </div>
             )}
 
@@ -304,7 +299,7 @@ const AdminPopup = () => {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-medium mb-2">קישור לכפתור / קובץ PDF</label>
+              <label className="block text-slate-700 font-medium mb-2">קישור לכפתור / תמונה</label>
               
               <div className="flex gap-2 mb-2">
                 <input
@@ -320,7 +315,7 @@ const AdminPopup = () => {
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileSelect}
-                  accept="application/pdf"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                   className="hidden"
                 />
                 
@@ -328,10 +323,10 @@ const AdminPopup = () => {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
                   className="px-4 py-2 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed rounded-lg text-slate-700 flex items-center gap-2 whitespace-nowrap"
-                  title="העלה PDF"
+                  title="העלה תמונה"
                 >
                   <Upload size={18} />
-                  <span>{uploading ? 'מעלה...' : 'העלה PDF'}</span>
+                  <span>{uploading ? 'מעלה...' : 'העלה תמונה'}</span>
                 </button>
 
                 {popup.actionUrl && (
@@ -346,9 +341,9 @@ const AdminPopup = () => {
               </div>
               
               <p className="text-xs text-slate-500 mt-1">
-                ניתן להדביק קישור חיצוני או להעלות קובץ PDF (עד 5MB).
+                ניתן להדביק קישור חיצוני או להעלות תמונה (עד 5MB).
                 <br />
-                הקובץ יישמר ב-Firebase Storage והכפתור יפתח אותו בלשונית חדשה.
+                התמונה תוצג בתוך המודעה. הכפתור יפתח את הקישור/תמונה בלשונית חדשה.
               </p>
             </div>
           </div>

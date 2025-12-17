@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, AlertTriangle, Info, Bell, FileText } from 'lucide-react'
+import { X, AlertTriangle, Info, Bell } from 'lucide-react'
 import { fetchFromFirebase } from '../utils/api'
 
 const UrgentPopup = () => {
@@ -113,23 +113,16 @@ const UrgentPopup = () => {
             </div>
           )}
 
-          {popup.actionUrl && (
+          {popup.actionUrl && popup.actionUrl.startsWith('http') && (
             <div className="mb-6 w-full">
-              {popup.actionUrl.endsWith('.pdf') || popup.actionUrl.startsWith('data:application/pdf') ? (
-                <div className="bg-slate-100 p-4 rounded-lg border-2 border-dashed border-slate-300">
-                  <FileText size={48} className="mx-auto mb-2 text-slate-500" />
-                  <p className="text-sm text-slate-600">קובץ PDF מצורף</p>
-                </div>
-              ) : (
-                <img 
-                  src={popup.actionUrl} 
-                  alt={popup.title || 'תמונה'} 
-                  className="w-full max-h-96 object-contain rounded-lg shadow-md"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                  }}
-                />
-              )}
+              <img 
+                src={popup.actionUrl} 
+                alt={popup.title || 'תמונה'} 
+                className="w-full max-h-96 object-contain rounded-lg shadow-md"
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                }}
+              />
             </div>
           )}
 
