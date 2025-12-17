@@ -11,11 +11,14 @@ import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import { ColorProvider, useColors } from './contexts/ColorContext'
 import { FontProvider, useFonts } from './contexts/FontContext'
+import { GradientProvider, useGradient } from './contexts/GradientContext'
 import HolidayElementManager from './components/HolidayElementManager'
+import UrgentPopup from './components/UrgentPopup'
 
 function AppContent() {
   const { colorsLoaded } = useColors()
   const { fontsLoaded } = useFonts()
+  const { gradientLoaded } = useGradient()
 
   useEffect(() => {
     // Initialize Netlify Identity
@@ -24,8 +27,8 @@ function AppContent() {
     }
   }, [])
 
-  // Show loading spinner until colors and fonts are loaded
-  if (!colorsLoaded || !fontsLoaded) {
+  // Show loading spinner until colors, fonts, and gradient are loaded
+  if (!colorsLoaded || !fontsLoaded || !gradientLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="spinner"></div>
@@ -34,8 +37,9 @@ function AppContent() {
   }
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen flex flex-col">
+        <UrgentPopup />
         <HolidayElementManager />
         <Navbar />
         <main className="flex-grow">
@@ -59,7 +63,9 @@ function App() {
   return (
     <ColorProvider>
       <FontProvider>
-        <AppContent />
+        <GradientProvider>
+          <AppContent />
+        </GradientProvider>
       </FontProvider>
     </ColorProvider>
   )

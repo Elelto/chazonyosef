@@ -76,6 +76,44 @@ export const authenticatedFetch = async (url, options = {}) => {
 export const fetchFromFirebase = async (endpoint) => {
   console.log('📥 Fetching from Firebase:', endpoint)
   
+  // Development mode: fetch from localStorage
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  if (isDevelopment) {
+    console.log('🔧 Dev mode: Fetching from localStorage instead of Firebase')
+    
+    // Map endpoint to localStorage key
+    const storageKey = endpoint.replace('firebase-', '')
+    let data = null
+    
+    if (endpoint === 'firebase-settings') {
+      const settings = localStorage.getItem('siteSettings')
+      if (settings) {
+        try {
+          data = { settings: JSON.parse(settings) }
+        } catch (e) {
+          console.error('Error parsing settings from localStorage', e)
+        }
+      }
+    } else {
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        try {
+          data = JSON.parse(stored)
+        } catch (e) {
+          console.error(`Error parsing ${storageKey} from localStorage`, e)
+        }
+      }
+    }
+    
+    if (data) {
+        console.log('✅ Loaded from localStorage:', data)
+        return Promise.resolve(data)
+    }
+    console.log('⚠️ Dev mode: No data found in localStorage for', endpoint)
+    // If no data in localStorage, we can try to fetch (which might fail) or return empty
+    // Letting it fall through to fetch allows 'netlify dev' to work if running
+  }
+  
   const response = await fetch(`/.netlify/functions/${endpoint}`, {
     method: 'GET',
     headers: {

@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { LogOut, Clock, Image, MessageSquare, Calendar, FileText, Layout, Settings, Phone } from 'lucide-react'
+import { 
+  LogOut, 
+  Clock, 
+  Image, 
+  MessageSquare, 
+  Calendar, 
+  FileText, 
+  Layout, 
+  Settings, 
+  Phone, 
+  Bell 
+} from 'lucide-react'
 import AdminPrayerTimes from '../admin/AdminPrayerTimes'
 import AdminGallery from '../admin/AdminGallery'
 import AdminAnnouncements from '../admin/AdminAnnouncements'
@@ -9,6 +20,7 @@ import AdminSiteContent from '../admin/AdminSiteContent'
 import AdminFooter from '../admin/AdminFooter'
 import AdminSiteSettings from '../admin/AdminSiteSettings'
 import AdminContactPage from '../admin/AdminContactPage'
+import AdminPopup from '../admin/AdminPopup'
 import { useColors } from '../contexts/ColorContext'
 import { useFonts } from '../contexts/FontContext'
 
@@ -20,7 +32,7 @@ const Admin = () => {
   const { fontsLoaded } = useFonts()
 
   useEffect(() => {
-    console.log('🔐 Initializing Netlify Identity...')
+    console.log(' Initializing Netlify Identity...')
     
     // Development mode bypass for localhost
     const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -165,6 +177,7 @@ const Admin = () => {
     { path: '/admin/gallery', label: 'גלריה', icon: Image },
     { path: '/admin/announcements', label: 'הודעות', icon: MessageSquare },
     { path: '/admin/events', label: 'אירועים ושיעורים', icon: Calendar },
+    { path: '/admin/popup', label: 'מודעה מתפרצת', icon: Bell },
   ]
 
   return (
@@ -232,6 +245,7 @@ const Admin = () => {
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="announcements" element={<AdminAnnouncements />} />
               <Route path="events" element={<AdminEvents />} />
+              <Route path="popup" element={<AdminPopup />} />
             </Routes>
           </div>
         </div>
