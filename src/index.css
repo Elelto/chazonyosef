@@ -84,18 +84,18 @@
   }
   
   body.button-gradient-enabled .btn-primary,
-  body.button-gradient-enabled .bg-primary-600,
   body.button-gradient-enabled a.bg-primary-600,
-  body.button-gradient-enabled button.bg-primary-600 {
+  body.button-gradient-enabled button.bg-primary-600,
+  body.button-gradient-enabled input[type="submit"].bg-primary-600 {
     background: linear-gradient(var(--button-gradient-direction), var(--button-gradient-colors)) !important;
     background-size: 200% 200% !important;
     transition: all 0.3s ease;
   }
   
   body.button-gradient-enabled .btn-primary:hover,
-  body.button-gradient-enabled .bg-primary-600:hover,
   body.button-gradient-enabled a.bg-primary-600:hover,
-  body.button-gradient-enabled button.bg-primary-600:hover {
+  body.button-gradient-enabled button.bg-primary-600:hover,
+  body.button-gradient-enabled input[type="submit"].bg-primary-600:hover {
     background-position: right center !important;
     transform: translateY(-2px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);

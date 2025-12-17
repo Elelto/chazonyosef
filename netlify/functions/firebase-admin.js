@@ -15,7 +15,8 @@ export const initializeFirebase = () => {
       FIREBASE_PRIVATE_KEY_ID: process.env.FIREBASE_PRIVATE_KEY_ID,
       FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
       FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
-      FIREBASE_CLIENT_ID: process.env.FIREBASE_CLIENT_ID
+      FIREBASE_CLIENT_ID: process.env.FIREBASE_CLIENT_ID,
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET
     }
 
     const missingVars = Object.entries(requiredVars)
@@ -51,7 +52,8 @@ export const initializeFirebase = () => {
 
     firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      projectId: requiredVars.FIREBASE_PROJECT_ID
+      projectId: requiredVars.FIREBASE_PROJECT_ID,
+      storageBucket: requiredVars.FIREBASE_STORAGE_BUCKET
     })
 
     console.log('✅ Firebase Admin initialized successfully')
@@ -71,6 +73,13 @@ export const getFirestore = () => {
     initializeFirebase()
   }
   return admin.firestore()
+}
+
+export const getStorage = () => {
+  if (!firebaseApp) {
+    initializeFirebase()
+  }
+  return admin.storage()
 }
 
 export const verifyAuth = (context) => {

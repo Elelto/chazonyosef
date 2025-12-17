@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Bell, Save, Eye, AlertTriangle, Info, X, Upload, FileText, Trash2 } from 'lucide-react'
-import { fetchFromFirebase, saveToFirebase } from '../utils/api'
+import { fetchFromFirebase, saveToFirebase, uploadFile } from '../utils/api'
 
 const AdminPopup = () => {
   const [popup, setPopup] = useState({
@@ -15,6 +15,7 @@ const AdminPopup = () => {
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [showPreview, setShowPreview] = useState(false)
   // Ref for file input
@@ -39,7 +40,7 @@ const AdminPopup = () => {
     }
   }
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
@@ -48,18 +49,29 @@ const AdminPopup = () => {
       return
     }
 
-    if (file.size > 0.5 * 1024 * 1024) { // 0.5MB limit to fit in Firestore document
-      setMessage('❌ הקובץ גדול מדי (מקסימום 0.5MB)')
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit for Firebase Storage
+      setMessage('❌ הקובץ גדול מדי (מקסימום 5MB)')
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setPopup(prev => ({ ...prev, actionUrl: e.target.result }))
-      setMessage('✅ הקובץ נטען בהצלחה! אל תשכח לשמור.')
+    setUploading(true)
+    setMessage('⏳ מעלה קובץ...')
+
+    try {
+      const result = await uploadFile(file)
+      setPopup(prev => ({ ...prev, actionUrl: result.url }))
+      setMessage('✅ הקובץ הועלה בהצלחה! אל תשכח לשמור.')
       setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      console.error('❌ Error uploading file:', error)
+      setMessage('❌ שגיאה בהעלאת הקובץ: ' + error.message)
+    } finally {
+      setUploading(false)
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
-    reader.readAsDataURL(file)
   }
 
   const handleSave = async () => {
@@ -290,11 +302,12 @@ const AdminPopup = () => {
                 
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 flex items-center gap-2 whitespace-nowrap"
+                  disabled={uploading}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed rounded-lg text-slate-700 flex items-center gap-2 whitespace-nowrap"
                   title="העלה PDF"
                 >
                   <Upload size={18} />
-                  <span>העלה PDF</span>
+                  <span>{uploading ? 'מעלה...' : 'העלה PDF'}</span>
                 </button>
 
                 {popup.actionUrl && (
@@ -309,9 +322,9 @@ const AdminPopup = () => {
               </div>
               
               <p className="text-xs text-slate-500 mt-1">
-                ניתן להדביק קישור חיצוני או להעלות קובץ PDF (עד 0.5MB).
+                ניתן להדביק קישור חיצוני או להעלות קובץ PDF (עד 5MB).
                 <br />
-                הכפתור יפתח את הקישור/קובץ בלשונית חדשה.
+                הקובץ יישמר ב-Firebase Storage והכפתור יפתח אותו בלשונית חדשה.
               </p>
             </div>
           </div>

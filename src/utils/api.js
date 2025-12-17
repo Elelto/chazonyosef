@@ -158,3 +158,52 @@ export const saveToFirebase = async (endpoint, data) => {
     body: JSON.stringify(data)
   })
 }
+
+/**
+ * Upload a file to Firebase Storage via Netlify Function
+ * @param {File} file - The file to upload
+ * @returns {Promise<{url: string, fileName: string, size: number}>}
+ */
+export const uploadFile = async (file) => {
+  console.log('📤 Uploading file:', file.name, file.type, file.size)
+  
+  // Development mode: convert to base64 and return as data URL (fallback)
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  if (isDevelopment) {
+    console.log('🔧 Dev mode: Converting file to base64 data URL')
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        resolve({
+          url: e.target.result,
+          fileName: file.name,
+          size: file.size
+        })
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+  
+  // Production: upload to Firebase Storage
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const result = await authenticatedFetch('/.netlify/functions/upload-file', {
+          method: 'POST',
+          body: JSON.stringify({
+            fileData: e.target.result,
+            fileName: file.name,
+            contentType: file.type
+          })
+        })
+        resolve(result)
+      } catch (error) {
+        reject(error)
+      }
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
