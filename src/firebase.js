@@ -1,6 +1,7 @@
 // Firebase configuration and initialization
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 
 // Firebase Web API Key - safe for public use
 // This key is automatically restricted to Firebase-related APIs only
@@ -19,5 +20,8 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firestore
 export const db = getFirestore(app)
+
+// Initialize Storage
+export const storage = getStorage(app)
 
 export default app
