@@ -27,39 +27,39 @@ const storage = getStorage(app)
 const db = getFirestore(app)
 
 async function cleanupOrphanedImages() {
-  console.log('🔍 מחפש קבצים יתומים...\n')
+  console.log('🔍 Searching for orphaned files...\n')
 
   try {
-    // 1. טען את רשימת התמונות מ-Firestore
+    // 1. Load images list from Firestore
     const galleryDoc = await getDoc(doc(db, 'settings', 'gallery'))
     const galleryData = galleryDoc.data()
     const registeredImages = galleryData?.images || []
     
-    console.log(`📋 נמצאו ${registeredImages.length} תמונות רשומות ב-Firestore`)
+    console.log(`📋 Found ${registeredImages.length} registered images in Firestore`)
     
-    // 2. צור סט של כל ה-paths הרשומים
+    // 2. Create set of all registered paths
     const registeredPaths = new Set()
     registeredImages.forEach(image => {
       if (image.storagePaths) {
-        // תמונות חדשות עם 3 גרסאות
+        // New images with 3 versions
         Object.values(image.storagePaths).forEach(path => {
           registeredPaths.add(path)
         })
       } else if (image.storagePath) {
-        // תמונות ישנות
+        // Old images
         registeredPaths.add(image.storagePath)
       }
     })
     
-    console.log(`📝 סה"כ ${registeredPaths.size} קבצים רשומים\n`)
+    console.log(`📝 Total ${registeredPaths.size} registered files\n`)
     
-    // 3. רשום את כל הקבצים ב-Storage
+    // 3. List all files in Storage
     const galleryRef = ref(storage, 'gallery')
     const filesList = await listAll(galleryRef)
     
-    console.log(`📦 נמצאו ${filesList.items.length} קבצים ב-Storage\n`)
+    console.log(`📦 Found ${filesList.items.length} files in Storage\n`)
     
-    // 4. מצא קבצים יתומים
+    // 4. Find orphaned files
     const orphanedFiles = []
     filesList.items.forEach(fileRef => {
       if (!registeredPaths.has(fileRef.fullPath)) {
@@ -68,54 +68,57 @@ async function cleanupOrphanedImages() {
     })
     
     if (orphanedFiles.length === 0) {
-      console.log('✅ לא נמצאו קבצים יתומים! הכל נקי.')
+      console.log('✅ No orphaned files found! Everything is clean.')
       return
     }
     
-    console.log(`⚠️  נמצאו ${orphanedFiles.length} קבצים יתומים:\n`)
+    console.log(`⚠️  Found ${orphanedFiles.length} orphaned files:\n`)
     orphanedFiles.forEach((fileRef, i) => {
       console.log(`   ${i + 1}. ${fileRef.name}`)
     })
     
-    // 5. שאל אישור למחיקה
-    console.log('\n❓ האם למחוק את הקבצים האלה? (y/n)')
+    // 5. Ask for confirmation
+    console.log('\n❓ Delete these files? (y/n)')
     
-    // בסביבת Node.js עם readline
-    const readline = require('readline').createInterface({
+    // בסביבת Node.js עם readline (ES modules)
+    const readline = await import('readline')
+    const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
     
-    readline.question('', async (answer) => {
-      if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-        console.log('\n🗑️  מוחק קבצים יתומים...\n')
-        
-        let deleted = 0
-        for (const fileRef of orphanedFiles) {
-          try {
-            await deleteObject(fileRef)
-            console.log(`   ✅ נמחק: ${fileRef.name}`)
-            deleted++
-          } catch (error) {
-            console.error(`   ❌ שגיאה במחיקת ${fileRef.name}:`, error.message)
-          }
-        }
-        
-        console.log(`\n✅ נמחקו ${deleted} מתוך ${orphanedFiles.length} קבצים`)
-        
-        // חישוב חיסכון במקום
-        const avgFileSize = 200 // KB (ממוצע של 3 גרסאות)
-        const savedSpace = (deleted * avgFileSize / 1024).toFixed(2)
-        console.log(`💾 חיסכון במקום: ~${savedSpace}MB`)
-      } else {
-        console.log('\n❌ המחיקה בוטלה')
-      }
-      
-      readline.close()
+    const answer = await new Promise(resolve => {
+      rl.question('', resolve)
     })
     
+    rl.close()
+    
+    if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+      console.log('\n🗑️  Deleting orphaned files...\n')
+      
+      let deleted = 0
+      for (const fileRef of orphanedFiles) {
+        try {
+          await deleteObject(fileRef)
+          console.log(`   ✅ Deleted: ${fileRef.name}`)
+          deleted++
+        } catch (error) {
+          console.error(`   ❌ Error deleting ${fileRef.name}:`, error.message)
+        }
+      }
+      
+      console.log(`\n✅ Deleted ${deleted} out of ${orphanedFiles.length} files`)
+      
+      // Calculate space saved
+      const avgFileSize = 200 // KB (average of 3 versions)
+      const savedSpace = (deleted * avgFileSize / 1024).toFixed(2)
+      console.log(`💾 Space saved: ~${savedSpace}MB`)
+    } else {
+      console.log('\n❌ Deletion cancelled')
+    }
+    
   } catch (error) {
-    console.error('❌ שגיאה:', error)
+    console.error('❌ Error:', error)
   }
 }
 

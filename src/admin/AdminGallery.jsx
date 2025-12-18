@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Image, Plus, Trash2, Save, Upload, Edit2, X, GripVertical, Check, Tag, Filter } from 'lucide-react'
+import { Image, Plus, Trash2, Save, Upload, Edit2, X, GripVertical, Check, Tag, Filter, Trash } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 import { storage } from '../firebase'
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from 'firebase/storage'
 import imageCompression from 'browser-image-compression'
 
 const CATEGORIES = ['אירועים', 'בית המדרש', 'שיעורים', 'חגים', 'פעילויות', 'אחר']
@@ -16,6 +16,7 @@ const AdminGallery = () => {
   const [uploading, setUploading] = useState(false)
   const [compressing, setCompressing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [cleaning, setCleaning] = useState(false)
   const [message, setMessage] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editData, setEditData] = useState({ title: '', description: '', category: '', tags: '' })
@@ -309,6 +310,72 @@ const AdminGallery = () => {
     }
   }
 
+  const handleCleanupOrphanedFiles = async () => {
+    if (!confirm('האם לחפש ולמחוק קבצים יתומים ב-Storage?\n\nקבצים יתומים = קבצים שהועלו אבל לא נשמרו ב-Firestore.')) {
+      return
+    }
+
+    setCleaning(true)
+    setMessage('🔍 מחפש קבצים יתומים...')
+
+    try {
+      // 1. צור סט של כל ה-paths הרשומים
+      const registeredPaths = new Set()
+      images.forEach(image => {
+        if (image.storagePaths) {
+          Object.values(image.storagePaths).forEach(path => {
+            registeredPaths.add(path)
+          })
+        } else if (image.storagePath) {
+          registeredPaths.add(image.storagePath)
+        }
+      })
+
+      // 2. רשום את כל הקבצים ב-Storage
+      const galleryRef = ref(storage, 'gallery')
+      const filesList = await listAll(galleryRef)
+
+      // 3. מצא קבצים יתומים
+      const orphanedFiles = []
+      filesList.items.forEach(fileRef => {
+        if (!registeredPaths.has(fileRef.fullPath)) {
+          orphanedFiles.push(fileRef)
+        }
+      })
+
+      if (orphanedFiles.length === 0) {
+        setMessage('✅ לא נמצאו קבצים יתומים! הכל נקי.')
+        setTimeout(() => setMessage(''), 3000)
+        setCleaning(false)
+        return
+      }
+
+      // 4. מחק קבצים יתומים
+      setMessage(`🗑️ נמצאו ${orphanedFiles.length} קבצים יתומים, מוחק...`)
+      
+      let deleted = 0
+      for (const fileRef of orphanedFiles) {
+        try {
+          await deleteObject(fileRef)
+          console.log(`✅ נמחק: ${fileRef.name}`)
+          deleted++
+        } catch (error) {
+          console.error(`❌ שגיאה במחיקת ${fileRef.name}:`, error.message)
+        }
+      }
+
+      const savedSpace = (deleted * 0.2).toFixed(2) // ממוצע 200KB לקובץ
+      setMessage(`✅ נמחקו ${deleted} מתוך ${orphanedFiles.length} קבצים יתומים! חיסכון: ~${savedSpace}MB`)
+      setTimeout(() => setMessage(''), 5000)
+    } catch (error) {
+      console.error('Error cleaning orphaned files:', error)
+      setMessage('❌ שגיאה בניקוי קבצים יתומים')
+      setTimeout(() => setMessage(''), 3000)
+    } finally {
+      setCleaning(false)
+    }
+  }
+
   const handleEditImage = (image) => {
     setEditingId(image.id)
     setEditData({ 
@@ -419,14 +486,25 @@ const AdminGallery = () => {
             <Image className="text-primary-600" size={32} />
             ניהול גלריה
           </h2>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="btn-primary disabled:opacity-50 flex items-center gap-2"
-          >
-            <Save size={18} />
-            {saving ? 'שומר...' : 'שמור שינויים'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleCleanupOrphanedFiles}
+              disabled={cleaning}
+              className="btn-secondary disabled:opacity-50 flex items-center gap-2"
+              title="מחק קבצים יתומים ב-Storage"
+            >
+              <Trash size={18} />
+              {cleaning ? 'מנקה...' : 'נקה קבצים יתומים'}
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-primary disabled:opacity-50 flex items-center gap-2"
+            >
+              <Save size={18} />
+              {saving ? 'שומר...' : 'שמור שינויים'}
+            </button>
+          </div>
         </div>
 
         {message && (
