@@ -3,10 +3,9 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
-// Firebase Web API Key - safe for public use
-// This key is automatically restricted to Firebase-related APIs only
+// Firebase configuration - API key from environment variable for security
 const firebaseConfig = {
-  apiKey: "AIzaSyCahm3Mr6eM4j0XACPDexiHCI7fq0wlI_E",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "chazon-e3dc4.firebaseapp.com",
   projectId: "chazon-e3dc4",
   storageBucket: "chazon-e3dc4.firebasestorage.app",
