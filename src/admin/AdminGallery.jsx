@@ -243,12 +243,24 @@ const AdminGallery = () => {
 
       const updatedImages = [...images, ...uploadedImages]
       setImages(updatedImages)
+      
+      // שמירה אוטומטית ל-Firestore מיד אחרי העלאה
+      try {
+        await saveToFirebase('firebase-gallery', { images: updatedImages })
+        console.log('💾 תמונות נשמרו אוטומטית ל-Firestore')
+      } catch (saveError) {
+        console.error('❌ שגיאה בשמירה אוטומטית:', saveError)
+        setMessage('⚠️ התמונות הועלו אבל לא נשמרו - לחץ "שמור שינויים"')
+        setTimeout(() => setMessage(''), 5000)
+        return
+      }
+      
       setNewImage({ url: '', title: '', description: '', category: '', tags: '' })
       setSelectedFiles([])
       setPreviewUrls([])
       setUploadProgress({})
       setUploading(false)
-      setMessage(`✅ ${uploadedImages.length} תמונות הועלו בהצלחה!`)
+      setMessage(`✅ ${uploadedImages.length} תמונות הועלו ונשמרו בהצלחה!`)
       setTimeout(() => setMessage(''), 3000)
       
       if (fileInputRef.current) {
