@@ -141,6 +141,13 @@ export const saveToFirebase = async (endpoint, data) => {
   if (isDevelopment) {
     console.log('🔧 Dev mode: Saving to localStorage instead of Firebase')
     
+    // Check authentication even in dev mode
+    const token = getAuthToken()
+    if (!token) {
+      console.error('❌ Not authenticated - cannot save')
+      throw new Error('לא מחובר - אנא התחבר מחדש')
+    }
+    
     // Map endpoint to localStorage key
     const storageKey = endpoint.replace('firebase-', '')
     
