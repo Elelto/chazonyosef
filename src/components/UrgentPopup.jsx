@@ -13,29 +13,54 @@ const UrgentPopup = () => {
 
   const loadPopup = async () => {
     try {
-      // First check session storage to avoid showing again in same session if closed
       const sessionHidden = sessionStorage.getItem('popupHidden')
-      
       const data = await fetchFromFirebase('firebase-popup')
       
-      if (data && data.popup && data.popup.isActive) {
-        // Check if we should show it based on ID (if changed) and session
-        const lastSeenId = localStorage.getItem('lastSeenPopupId')
-        const isNewPopup = data.popup.id !== lastSeenId
+      // Handle both old format (single popup) and new format (array of popups)
+      let popups = []
+      if (data && data.popups) {
+        popups = data.popups
+      } else if (data && data.popup) {
+        popups = [data.popup]
+      }
+      
+      // Filter active popups that are within date range
+      const now = new Date()
+      const activePopups = popups.filter(p => {
+        if (!p.isActive) return false
         
-        // If it's a new popup, clear the session storage
-        if (isNewPopup) {
-          sessionStorage.removeItem('popupHidden')
-        }
+        const startDate = p.startDate ? new Date(p.startDate) : null
+        const endDate = p.endDate ? new Date(p.endDate) : null
         
-        // Show if it's a new popup OR hasn't been hidden in this session
-        const shouldShow = isNewPopup || !sessionHidden
+        const isWithinDateRange = 
+          (!startDate || now >= startDate) && 
+          (!endDate || now <= endDate)
         
-        if (shouldShow) {
-          setPopup(data.popup)
-          // Add a small delay for animation effect
-          setTimeout(() => setIsVisible(true), 1000)
-        }
+        return isWithinDateRange
+      })
+      
+      if (activePopups.length === 0) return
+      
+      // Get the most recent active popup (by createdAt or updatedAt)
+      const currentPopup = activePopups.sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt || 0)
+        const dateB = new Date(b.updatedAt || b.createdAt || 0)
+        return dateB - dateA
+      })[0]
+      
+      // Check if we should show it based on ID and session
+      const lastSeenId = localStorage.getItem('lastSeenPopupId')
+      const isNewPopup = currentPopup.id !== lastSeenId
+      
+      if (isNewPopup) {
+        sessionStorage.removeItem('popupHidden')
+      }
+      
+      const shouldShow = isNewPopup || !sessionHidden
+      
+      if (shouldShow) {
+        setPopup(currentPopup)
+        setTimeout(() => setIsVisible(true), 1000)
       }
     } catch (error) {
       console.error('Error loading popup:', error)
