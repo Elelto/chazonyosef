@@ -21,6 +21,12 @@ function AppContent() {
   const { gradientLoaded } = useGradient()
 
   useEffect(() => {
+    // Force HTTPS redirect
+    if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+      window.location.href = window.location.href.replace('http:', 'https:')
+      return
+    }
+
     // Initialize Netlify Identity
     if (window.netlifyIdentity) {
       window.netlifyIdentity.init()
