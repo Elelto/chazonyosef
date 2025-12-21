@@ -43,17 +43,13 @@ async function generateIcons() {
       console.log(`✅ נוצר: ${name} (${size}x${size})`);
     }
 
-    // Generate favicon.ico (using 32x32 size, cropped to center to remove dark edges)
+    // Generate favicon.ico with background removal
     const faviconPath = path.join(outputDir, 'favicon.ico');
-    const imageMetadata = await sharp(inputPath).metadata();
     
-    // Crop to center 70% to focus on the logo and remove dark background edges
-    const cropSize = Math.floor(Math.min(imageMetadata.width, imageMetadata.height) * 0.7);
-    const left = Math.floor((imageMetadata.width - cropSize) / 2);
-    const top = Math.floor((imageMetadata.height - cropSize) / 2);
-    
+    // First, try to remove the dark background by making it transparent
+    // Then add white background only where needed
     await sharp(inputPath)
-      .extract({ left, top, width: cropSize, height: cropSize })
+      .trim({ threshold: 30 }) // Trim dark edges
       .resize(32, 32, {
         fit: 'contain',
         background: { r: 255, g: 255, b: 255, alpha: 1 }
