@@ -113,6 +113,19 @@ const Contact = () => {
   }
 
   const pageContent = content || defaultContent
+  
+  // Normalize contactInfo structure (support both simple and nested formats)
+  const normalizedContactInfo = {
+    address: typeof pageContent.contactInfo.address === 'string' 
+      ? pageContent.contactInfo.address 
+      : `${pageContent.contactInfo.address.street}, ${pageContent.contactInfo.address.city}`,
+    phone: typeof pageContent.contactInfo.phone === 'string'
+      ? pageContent.contactInfo.phone
+      : pageContent.contactInfo.phone.display || pageContent.contactInfo.phone.number,
+    email: typeof pageContent.contactInfo.email === 'string'
+      ? pageContent.contactInfo.email
+      : pageContent.contactInfo.email.display || pageContent.contactInfo.email.address
+  }
 
   return (
     <div className="py-12 animate-fade-in">
@@ -127,7 +140,7 @@ const Contact = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
-          <div>
+          <div>normlizd
             <h2 className="text-2xl font-bold text-slate-800 mb-6">פרטי התקשרות</h2>
             
             <div className="space-y-6">
@@ -142,10 +155,10 @@ const Contact = () => {
                     <p className="text-slate-600">
                       {pageContent.contactInfo.address}
                     </p>
-                  </div>
+                  </div>normlizd
                 </div>
               </div>
-
+normlizd
               {/* Phone */}
               <div className="card hover:shadow-xl transition-shadow">
                 <div className="flex items-start gap-4">
@@ -160,10 +173,10 @@ const Contact = () => {
                     >
                       {pageContent.contactInfo.phone}
                     </a>
-                  </div>
+                  </div>normlizd
                 </div>
               </div>
-
+normlizd
               {/* Email */}
               <div className="card hover:shadow-xl transition-shadow">
                 <div className="flex items-start gap-4">
