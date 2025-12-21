@@ -112,20 +112,31 @@ const Contact = () => {
     }
   }
 
-  const pageContent = content || defaultContent
-  
-  // Normalize contactInfo structure (support both simple and nested formats)
-  const normalizedContactInfo = {
-    address: typeof pageContent.contactInfo.address === 'string' 
-      ? pageContent.contactInfo.address 
-      : `${pageContent.contactInfo.address.street}, ${pageContent.contactInfo.address.city}`,
-    phone: typeof pageContent.contactInfo.phone === 'string'
-      ? pageContent.contactInfo.phone
-      : pageContent.contactInfo.phone.display || pageContent.contactInfo.phone.number,
-    email: typeof pageContent.contactInfo.email === 'string'
-      ? pageContent.contactInfo.email
-      : pageContent.contactInfo.email.display || pageContent.contactInfo.email.address
+  // Normalize content structure before using it
+  const normalizeContent = (rawContent) => {
+    if (!rawContent) return defaultContent
+    
+    const normalized = { ...rawContent }
+    
+    // Normalize contactInfo if it exists
+    if (rawContent.contactInfo) {
+      normalized.contactInfo = {
+        address: typeof rawContent.contactInfo.address === 'string' 
+          ? rawContent.contactInfo.address 
+          : `${rawContent.contactInfo.address?.street || ''}, ${rawContent.contactInfo.address?.city || ''}`,
+        phone: typeof rawContent.contactInfo.phone === 'string'
+          ? rawContent.contactInfo.phone
+          : rawContent.contactInfo.phone?.display || rawContent.contactInfo.phone?.number || '',
+        email: typeof rawContent.contactInfo.email === 'string'
+          ? rawContent.contactInfo.email
+          : rawContent.contactInfo.email?.display || rawContent.contactInfo.email?.address || ''
+      }
+    }
+    
+    return normalized
   }
+  
+  const pageContent = normalizeContent(content)
 
   return (
     <div className="py-12 animate-fade-in">
@@ -140,7 +151,7 @@ const Contact = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
-          <div>normlizd
+          <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-6">פרטי התקשרות</h2>
             
             <div className="space-y-6">
@@ -173,10 +184,10 @@ normlizd
                     >
                       {pageContent.contactInfo.phone}
                     </a>
-                  </div>normlizd
+                  </div>
                 </div>
               </div>
-normlizd
+
               {/* Email */}
               <div className="card hover:shadow-xl transition-shadow">
                 <div className="flex items-start gap-4">
