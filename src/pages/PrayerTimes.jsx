@@ -42,6 +42,30 @@ const PrayerTimes = () => {
     )
   }
 
+  if (!prayerTimes) {
+    return (
+      <div className="py-12 animate-fade-in">
+        <div className="container-custom">
+          <div className="text-center">
+            <h1 className="section-title">זמני תפילות</h1>
+            <p className="section-subtitle mb-8">
+              זמני התפילות בבית המדרש "חזון יוסף"
+            </p>
+            <div className="card max-w-md mx-auto">
+              <Clock className="w-16 h-16 text-primary-600 mx-auto mb-4" />
+              <p className="text-lg text-slate-600">
+                זמני התפילות יעודכנו בקרוב
+              </p>
+              <p className="text-sm text-slate-500 mt-2">
+                לפרטים נוספים ניתן ליצור קשר עם בית המדרש
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="py-12 animate-fade-in">
       <div className="container-custom">

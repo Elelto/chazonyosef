@@ -14,6 +14,8 @@ import { FontProvider, useFonts } from './contexts/FontContext'
 import { GradientProvider, useGradient } from './contexts/GradientContext'
 import HolidayElementManager from './components/HolidayElementManager'
 import UrgentPopup from './components/UrgentPopup'
+import InstallPrompt from './components/InstallPrompt'
+import PWAStatus from './components/PWAStatus'
 
 function AppContent() {
   const { colorsLoaded } = useColors()
@@ -42,9 +44,13 @@ function AppContent() {
     )
   }
 
+  const isProduction = window.location.protocol === 'https:';
+
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen flex flex-col">
+        {isProduction && <PWAStatus />}
+        {isProduction && <InstallPrompt />}
         <UrgentPopup />
         <HolidayElementManager />
         <Navbar />

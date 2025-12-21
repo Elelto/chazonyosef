@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e40af" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="חזון יוסף" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
     
     <!-- Force HTTPS Redirect -->
     <script>
@@ -170,7 +178,7 @@
               root.style.setProperty('--gradient-colors', colors.join(', '));
               root.style.setProperty('--gradient-direction', settings.gradient.direction || 'to right');
               
-              if (settings.gradient.enabled) {
+              if (settings.gradient.enabled && document.body) {
                 document.body.classList.add('gradient-enabled');
                 document.body.style.background = `linear-gradient(${settings.gradient.direction || 'to right'}, ${colors.join(', ')})`;
                 document.body.style.backgroundAttachment = 'fixed';
@@ -186,7 +194,7 @@
               root.style.setProperty('--button-gradient-colors', buttonColors.join(', '));
               root.style.setProperty('--button-gradient-direction', settings.buttonGradient.direction || 'to right');
               
-              if (settings.buttonGradient.enabled) {
+              if (settings.buttonGradient.enabled && document.body) {
                 document.body.classList.add('button-gradient-enabled');
                 console.log('🎨 Button gradient preloaded from localStorage');
               }
@@ -295,6 +303,28 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('✅ Service Worker registered successfully:', registration.scope);
+              
+              // Check for updates periodically
+              setInterval(() => {
+                registration.update();
+              }, 60000); // Check every minute
+            })
+            .catch(error => {
+              console.error('❌ Service Worker registration failed:', error);
+            });
+        });
+      } else if ('serviceWorker' in navigator) {
+        console.log('ℹ️ PWA features available only in production (HTTPS).');
+      }
+    </script>
     
     <script>
       // Netlify Identity redirect handling

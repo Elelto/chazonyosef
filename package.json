@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check-setup": "node check-setup.js"
+    "check-setup": "node check-setup.js",
+    "generate-icons": "node generate-icons.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

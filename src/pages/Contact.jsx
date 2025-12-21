@@ -13,6 +13,7 @@ const Contact = () => {
   const [status, setStatus] = useState({ type: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [content, setContent] = useState(null)
+  const [contentLoading, setContentLoading] = useState(true)
 
   useEffect(() => {
     loadContent()
@@ -21,11 +22,13 @@ const Contact = () => {
   const loadContent = async () => {
     try {
       const data = await fetchFromFirebase('firebase-contact-page')
-      if (data.content) {
+      if (data?.content) {
         setContent(data.content)
       }
     } catch (error) {
       console.error('Error loading contact page content:', error)
+    } finally {
+      setContentLoading(false)
     }
   }
 
@@ -65,21 +68,21 @@ const Contact = () => {
 
       setStatus({
         type: 'success',
-        message: content?.form.successMessage || 'ההודעה נשלחה בהצלחה! ניצור איתך קשר בהקדם.'
+        message: pageContent?.form.successMessage || 'ההודעה נשלחה בהצלחה! ניצור איתך קשר בהקדם.'
       })
       setFormData({ name: '', email: '', phone: '', message: '' })
     } catch (error) {
       console.error('Error:', error)
       setStatus({
         type: 'error',
-        message: content?.form.errorMessage || 'אירעה שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר.'
+        message: pageContent?.form.errorMessage || 'אירעה שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר.'
       })
     } finally {
       setLoading(false)
     }
   }
 
-  if (!content) {
+  if (contentLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="spinner"></div>
@@ -87,21 +90,45 @@ const Contact = () => {
     )
   }
 
+  // Default content if not loaded from Firebase
+  const defaultContent = {
+    header: {
+      title: 'צור קשר',
+      subtitle: 'נשמח לשמוע ממך! השאר לנו הודעה ונחזור אליך בהקדם'
+    },
+    contactInfo: {
+      address: 'בעל התניא 26, בני ברק',
+      phone: '03-1234567',
+      email: 'info@chazonyosef.org'
+    },
+    form: {
+      namePlaceholder: 'שם מלא',
+      emailPlaceholder: 'כתובת אימייל',
+      phonePlaceholder: 'טלפון',
+      messagePlaceholder: 'הודעה',
+      submitButton: 'שלח הודעה',
+      successMessage: 'ההודעה נשלחה בהצלחה! נחזור אליך בהקדם.',
+      errorMessage: 'אירעה שגיאה בשליחת ההודעה. אנא נסה שוב מאוחר יותר.'
+    }
+  }
+
+  const pageContent = content || defaultContent
+
   return (
     <div className="py-12 animate-fade-in">
       <div className="container-custom">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="section-title">{content.header.title}</h1>
+          <h1 className="section-title">{pageContent.header.title}</h1>
           <p className="section-subtitle">
-            {content.header.subtitle}
+            {pageContent.header.subtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">{content.contactInfo.title}</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">פרטי התקשרות</h2>
             
             <div className="space-y-6">
               {/* Address */}
@@ -113,17 +140,8 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">כתובת</h3>
                     <p className="text-slate-600">
-                      {content.contactInfo.address.street}<br />
-                      {content.contactInfo.address.city}, {content.contactInfo.address.country}
+                      {pageContent.contactInfo.address}
                     </p>
-                    <a
-                      href={content.contactInfo.address.mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 hover:text-primary-700 underline mt-2 inline-block"
-                    >
-                      {content.contactInfo.address.mapLinkText}
-                    </a>
                   </div>
                 </div>
               </div>
@@ -137,10 +155,10 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">טלפון</h3>
                     <a
-                      href={`tel:${content.contactInfo.phone.number}`}
+                      href={`tel:${pageContent.contactInfo.phone}`}
                       className="text-slate-600 hover:text-gold-600 transition-colors"
                     >
-                      {content.contactInfo.phone.display}
+                      {pageContent.contactInfo.phone}
                     </a>
                   </div>
                 </div>
@@ -155,10 +173,10 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">אימייל</h3>
                     <a
-                      href={`mailto:${content.contactInfo.email.address}`}
+                      href={`mailto:${pageContent.contactInfo.email}`}
                       className="text-slate-600 hover:text-primary-600 transition-colors"
                     >
-                      {content.contactInfo.email.display}
+                      {pageContent.contactInfo.email}
                     </a>
                   </div>
                 </div>
@@ -173,8 +191,8 @@ const Contact = () => {
                   <div>
                     <h3 className="font-bold text-slate-800 mb-2">שעות פעילות</h3>
                     <div className="text-slate-600 space-y-1">
-                      <p>{content.contactInfo.hours.weekdays}</p>
-                      <p>{content.contactInfo.hours.shabbat}</p>
+                      <p>ימים א'-ה': 6:00-23:00</p>
+                      <p>שבת: סגור</p>
                     </div>
                   </div>
                 </div>
@@ -183,11 +201,11 @@ const Contact = () => {
 
             {/* Map Placeholder */}
             <div className="mt-8 card">
-              <h3 className="font-bold text-slate-800 mb-4">{content.map.title}</h3>
+              <h3 className="font-bold text-slate-800 mb-4">מיקום</h3>
               <div className="bg-slate-200 rounded-lg h-64 flex items-center justify-center">
                 <div className="text-center text-slate-600">
                   <MapPin className="mx-auto mb-2" size={48} />
-                  <p>{content.map.placeholder}</p>
+                  <p>מפה תתווסף בקרוב</p>
                 </div>
               </div>
             </div>
@@ -195,13 +213,13 @@ const Contact = () => {
 
           {/* Contact Form */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">{content.form.title}</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">שלח לנו הודעה</h2>
             
             <div className="card">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-slate-700 font-medium mb-2">
-                    {content.form.nameLabel} *
+                    שם מלא *
                   </label>
                   <input
                     type="text"
@@ -211,13 +229,13 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="input-field"
-                    placeholder={content.form.namePlaceholder}
+                    placeholder={pageContent.form.namePlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block text-slate-700 font-medium mb-2">
-                    {content.form.emailLabel} *
+                    אימייל *
                   </label>
                   <input
                     type="email"
@@ -227,13 +245,13 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="input-field"
-                    placeholder={content.form.emailPlaceholder}
+                    placeholder={pageContent.form.emailPlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-slate-700 font-medium mb-2">
-                    {content.form.phoneLabel}
+                    טלפון
                   </label>
                   <input
                     type="tel"
@@ -242,13 +260,13 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="input-field"
-                    placeholder={content.form.phonePlaceholder}
+                    placeholder={pageContent.form.phonePlaceholder}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-slate-700 font-medium mb-2">
-                    {content.form.messageLabel} *
+                    הודעה *
                   </label>
                   <textarea
                     id="message"
@@ -258,7 +276,7 @@ const Contact = () => {
                     required
                     rows="6"
                     className="input-field resize-none"
-                    placeholder={content.form.messagePlaceholder}
+                    placeholder={pageContent.form.messagePlaceholder}
                   ></textarea>
                 </div>
 
@@ -294,12 +312,12 @@ const Contact = () => {
                   {loading ? (
                     <>
                       <div className="spinner w-5 h-5 border-2"></div>
-                      <span>{content.form.submittingButton}</span>
+                      <span>שולח...</span>
                     </>
                   ) : (
                     <>
                       <Mail size={20} />
-                      <span>{content.form.submitButton}</span>
+                      <span>{pageContent.form.submitButton}</span>
                     </>
                   )}
                 </button>

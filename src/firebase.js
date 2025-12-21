@@ -1,6 +1,6 @@
 // Firebase configuration and initialization
 import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 // Firebase configuration - API key from environment variable for security
@@ -19,6 +19,25 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firestore
 export const db = getFirestore(app)
+
+// Enable offline persistence for Firestore (only in production/HTTPS)
+if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+  enableIndexedDbPersistence(db)
+    .then(() => {
+      console.log('✅ Firestore offline persistence enabled');
+    })
+    .catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('⚠️ Firestore persistence failed: Multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        console.warn('⚠️ Firestore persistence not supported by browser');
+      } else {
+        console.error('❌ Firestore persistence error:', err);
+      }
+    });
+} else {
+  console.log('ℹ️ Firestore offline persistence disabled in development');
+}
 
 // Initialize Storage
 export const storage = getStorage(app)
