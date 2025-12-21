@@ -11,12 +11,12 @@ export const initializeFirebase = () => {
   try {
     // Check required environment variables
     const requiredVars = {
-      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
-      FIREBASE_PRIVATE_KEY_ID: process.env.FIREBASE_PRIVATE_KEY_ID,
-      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
-      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
-      FIREBASE_CLIENT_ID: process.env.FIREBASE_CLIENT_ID,
-      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET
+      FIREBASE_PROJECT_ID: 'chazon-e3dc4',
+      FIREBASE_PRIVATE_KEY_ID: process.env.FIREBASE_ADMIN_PRIVATE_KEY_ID,
+      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_ADMIN_PRIVATE_KEY,
+      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      FIREBASE_CLIENT_ID: process.env.FIREBASE_ADMIN_CLIENT_ID,
+      FIREBASE_STORAGE_BUCKET: 'chazon-e3dc4.firebasestorage.app'
     }
 
     const missingVars = Object.entries(requiredVars)
