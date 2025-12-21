@@ -38,36 +38,35 @@
 
 ## 🔐 הגדרת משתני סביבה
 
-### ב-Netlify:
+### 2️⃣ הגדרת Netlify (5 דקות):
 
-1. היכנס ל-[Netlify Dashboard](https://app.netlify.com)
-2. בחר את האתר שלך
-3. לך ל-**Site settings** → **Environment variables**
-4. הוסף את המשתנים הבאים:
+[Netlify Dashboard](https://app.netlify.com) → האתר שלך → Site settings → Environment variables:
 
-#### `VITE_FIREBASE_VAPID_KEY`
-```
-B...כאן_את_המפתח_שהעתקת_משלב_1
-```
+**פתח את קובץ ה-JSON שהורדת בשלב 1ב והעתק את הערכים הבאים:**
 
-#### `FIREBASE_SERVICE_ACCOUNT`
-פתח את קובץ ה-JSON שהורדת בשלב 2 והעתק את **כל התוכן** (כולל הסוגריים):
+**הוסף רק את המשתנים הסודיים הבאים:**
+
+מקובץ ה-JSON שהורדת מ-Firebase:
+- `FIREBASE_ADMIN_PRIVATE_KEY_ID` = הערך של `private_key_id`
+- `FIREBASE_ADMIN_PRIVATE_KEY` = הערך של `private_key` (כולל `-----BEGIN PRIVATE KEY-----` וכו')
+- `FIREBASE_ADMIN_CLIENT_EMAIL` = הערך של `client_email`
+- `FIREBASE_ADMIN_CLIENT_ID` = הערך של `client_id`
+
+מ-Firebase Console:
+- `VITE_FIREBASE_API_KEY` = ה-API Key
+- `VITE_FIREBASE_VAPID_KEY` = המפתח מ-שלב 1א
+
+**דוגמה מקובץ ה-JSON:**
 ```json
 {
-  "type": "service_account",
-  "project_id": "chazon-e3dc4",
-  "private_key_id": "...",
-  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
-  "client_email": "...",
-  "client_id": "...",
-  "auth_uri": "...",
-  "token_uri": "...",
-  "auth_provider_x509_cert_url": "...",
-  "client_x509_cert_url": "..."
+  "private_key_id": "abc123def456...",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBA...\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-xxxxx@chazon-e3dc4.iam.gserviceaccount.com",
+  "client_id": "123456789012345678"
 }
 ```
 
-**חשוב:** הדבק את כל התוכן כ-**שורה אחת** או כפי שהוא (Netlify יודע לטפל בשניהם).
+**חשוב:** ב-`FIREBASE_ADMIN_PRIVATE_KEY` - העתק **בדיוק כמו שהוא**, כולל `\n`.
 
 ### בפיתוח מקומי (אופציונלי):
 
