@@ -43,19 +43,28 @@ async function generateIcons() {
       console.log(`✅ נוצר: ${name} (${size}x${size})`);
     }
 
-    // Generate favicon.ico (using 32x32 size)
+    // Generate favicon.ico (using 32x32 size, cropped to center to remove dark edges)
     const faviconPath = path.join(outputDir, 'favicon.ico');
+    const imageMetadata = await sharp(inputPath).metadata();
+    
+    // Crop to center 70% to focus on the logo and remove dark background edges
+    const cropSize = Math.floor(Math.min(imageMetadata.width, imageMetadata.height) * 0.7);
+    const left = Math.floor((imageMetadata.width - cropSize) / 2);
+    const top = Math.floor((imageMetadata.height - cropSize) / 2);
+    
     await sharp(inputPath)
+      .extract({ left, top, width: cropSize, height: cropSize })
       .resize(32, 32, {
         fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
       })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .png()
       .toFile(faviconPath.replace('.ico', '-temp.png'));
     
     // Rename to .ico (browsers accept PNG format with .ico extension)
     await fs.rename(faviconPath.replace('.ico', '-temp.png'), faviconPath);
-    console.log(`✅ נוצר: favicon.ico (32x32)`);
+    console.log(`✅ נוצר: favicon.ico (32x32) ממוקד במרכז`);
 
     console.log('\n🎉 כל האייקונים נוצרו בהצלחה!');
     console.log('📁 מיקום: public/');
