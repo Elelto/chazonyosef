@@ -104,10 +104,10 @@
 
 @media (max-width: 768px) {
   .menorah-container {
-    bottom: 20px;
+    bottom: 80px;
     right: 50%;
     transform: translateX(50%);
-    width: 300px;
+    width: 280px;
   }
 }
 
