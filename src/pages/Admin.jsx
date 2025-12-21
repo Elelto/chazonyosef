@@ -21,6 +21,7 @@ import AdminFooter from '../admin/AdminFooter'
 import AdminSiteSettings from '../admin/AdminSiteSettings'
 import AdminContactPage from '../admin/AdminContactPage'
 import AdminPopup from '../admin/AdminPopup'
+import AdminNotifications from '../admin/AdminNotifications'
 import { useColors } from '../contexts/ColorContext'
 import { useFonts } from '../contexts/FontContext'
 
@@ -177,6 +178,7 @@ const Admin = () => {
     { path: '/admin/gallery', label: 'גלריה', icon: Image },
     { path: '/admin/announcements', label: 'הודעות', icon: MessageSquare },
     { path: '/admin/events', label: 'אירועים ושיעורים', icon: Calendar },
+    { path: '/admin/notifications', label: 'הודעות Push', icon: Bell },
     { path: '/admin/popup', label: 'מודעה מתפרצת', icon: Bell },
   ]
 
@@ -245,6 +247,7 @@ const Admin = () => {
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="announcements" element={<AdminAnnouncements />} />
               <Route path="events" element={<AdminEvents />} />
+              <Route path="notifications" element={<AdminNotifications />} />
               <Route path="popup" element={<AdminPopup />} />
             </Routes>
           </div>

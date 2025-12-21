@@ -43,24 +43,19 @@ async function generateIcons() {
       console.log(`✅ נוצר: ${name} (${size}x${size})`);
     }
 
-    // Generate favicon.ico with background removal
+    // Generate favicon.ico (using 32x32 size)
     const faviconPath = path.join(outputDir, 'favicon.ico');
-    
-    // First, try to remove the dark background by making it transparent
-    // Then add white background only where needed
     await sharp(inputPath)
-      .trim({ threshold: 30 }) // Trim dark edges
       .resize(32, 32, {
         fit: 'contain',
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
+        background: { r: 0, g: 0, b: 0, alpha: 0 }
       })
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .png()
       .toFile(faviconPath.replace('.ico', '-temp.png'));
     
     // Rename to .ico (browsers accept PNG format with .ico extension)
     await fs.rename(faviconPath.replace('.ico', '-temp.png'), faviconPath);
-    console.log(`✅ נוצר: favicon.ico (32x32) ממוקד במרכז`);
+    console.log(`✅ נוצר: favicon.ico (32x32)`);
 
     console.log('\n🎉 כל האייקונים נוצרו בהצלחה!');
     console.log('📁 מיקום: public/');

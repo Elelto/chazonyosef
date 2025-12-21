@@ -16,6 +16,7 @@ import HolidayElementManager from './components/HolidayElementManager'
 import UrgentPopup from './components/UrgentPopup'
 import InstallPrompt from './components/InstallPrompt'
 import PWAStatus from './components/PWAStatus'
+import NotificationPermission from './components/NotificationPermission'
 
 function AppContent() {
   const { colorsLoaded } = useColors()
@@ -51,6 +52,7 @@ function AppContent() {
       <div className="min-h-screen flex flex-col">
         {isProduction && <PWAStatus />}
         {isProduction && <InstallPrompt />}
+        {isProduction && <NotificationPermission />}
         <UrgentPopup />
         <HolidayElementManager />
         <Navbar />

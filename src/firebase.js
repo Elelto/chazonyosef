@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
+import { getMessaging, isSupported } from 'firebase/messaging'
 
 // Firebase configuration - API key from environment variable for security
 const firebaseConfig = {
@@ -42,4 +43,20 @@ if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
 // Initialize Storage
 export const storage = getStorage(app)
 
+// Initialize Messaging (only in supported browsers)
+let messaging = null
+if (typeof window !== 'undefined') {
+  isSupported().then(supported => {
+    if (supported) {
+      messaging = getMessaging(app)
+      console.log('✅ Firebase Messaging initialized')
+    } else {
+      console.log('ℹ️ Firebase Messaging not supported in this browser')
+    }
+  }).catch(err => {
+    console.warn('⚠️ Firebase Messaging check failed:', err)
+  })
+}
+
+export { messaging }
 export default app
