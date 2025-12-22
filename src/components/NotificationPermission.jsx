@@ -138,7 +138,7 @@ const NotificationPermission = () => {
       )}
 
       {showPrompt && (
-        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-50 animate-slide-up">
+        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-[9999] animate-slide-up">
           <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-lg shadow-2xl p-6">
             <button
               onClick={dismissPrompt}

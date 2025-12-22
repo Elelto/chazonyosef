@@ -20,8 +20,7 @@ const InstallPrompt = () => {
       return;
     }
 
-    const hasSeenPrompt = localStorage.getItem('pwa-install-prompt-seen');
-    if (!hasSeenPrompt && !isIOSDevice) {
+    if (!isIOSDevice) {
       setTimeout(() => {
         setShowPrompt(true);
       }, 3000);
@@ -69,12 +68,10 @@ const InstallPrompt = () => {
 
     setDeferredPrompt(null);
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-prompt-seen', 'true');
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-prompt-seen', 'true');
   };
 
   if (isInstalled) {
