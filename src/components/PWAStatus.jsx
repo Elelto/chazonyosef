@@ -7,6 +7,12 @@ const PWAStatus = () => {
   const [registration, setRegistration] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
+  // Debug wrapper for setUpdateAvailable
+  const setUpdateAvailableWithLog = (value) => {
+    console.log('🔔 setUpdateAvailable called:', value, 'Stack:', new Error().stack);
+    setUpdateAvailable(value);
+  };
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -24,8 +30,16 @@ const PWAStatus = () => {
 
         // Check if there's already a waiting worker (real update pending)
         if (reg.waiting && navigator.serviceWorker.controller) {
-          console.log('⚠️ Real update already waiting');
-          setUpdateAvailable(true);
+          console.log('⚠️ Real update already waiting', {
+            hasWaiting: !!reg.waiting,
+            hasController: !!navigator.serviceWorker.controller
+          });
+          setUpdateAvailableWithLog(true);
+        } else {
+          console.log('ℹ️ No waiting worker on load', {
+            hasWaiting: !!reg.waiting,
+            hasController: !!navigator.serviceWorker.controller
+          });
         }
 
         reg.addEventListener('updatefound', () => {
@@ -47,8 +61,11 @@ const PWAStatus = () => {
             // 1. There's a controller (not first install)
             // 2. New worker is installed (ready to take over)
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('✅ Real update installed and waiting for user action');
-              setUpdateAvailable(true);
+              console.log('✅ Real update installed and waiting for user action', {
+                workerState: newWorker.state,
+                hasController: !!navigator.serviceWorker.controller
+              });
+              setUpdateAvailableWithLog(true);
             }
           });
         });
@@ -99,6 +116,13 @@ const PWAStatus = () => {
     setInstallDismissed(false);
     window.location.reload();
   };
+
+  console.log('🔍 PWAStatus render:', { 
+    updateAvailable, 
+    hasRegistration: !!registration,
+    hasWaiting: !!(registration?.waiting),
+    hasController: !!navigator.serviceWorker?.controller
+  });
 
   if (updateAvailable) {
     console.log('🔔 Showing update notification');
