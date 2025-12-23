@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Wifi, WifiOff, RefreshCw, CheckCircle } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, CheckCircle, Download } from 'lucide-react';
 
 const PWAStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [registration, setRegistration] = useState(null);
+  const [installDismissed, setInstallDismissed] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
+    
+    // Check if install prompt was dismissed
+    const dismissed = localStorage.getItem('pwa-install-permanently-dismissed') === 'true';
+    setInstallDismissed(dismissed);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -49,6 +54,12 @@ const PWAStatus = () => {
     }
   };
 
+  const handleRestoreInstallPrompt = () => {
+    localStorage.removeItem('pwa-install-permanently-dismissed');
+    setInstallDismissed(false);
+    window.location.reload();
+  };
+
   if (updateAvailable) {
     return (
       <div className="fixed top-4 left-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-lg z-50 md:left-auto md:right-4 md:max-w-md">
@@ -79,6 +90,20 @@ const PWAStatus = () => {
           <p className="font-semibold">אתה במצב אופליין</p>
         </div>
       </div>
+    );
+  }
+
+  // Show restore install prompt button if dismissed and not in standalone mode
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
+  if (installDismissed && !isInstalled) {
+    return (
+      <button
+        onClick={handleRestoreInstallPrompt}
+        className="fixed bottom-20 left-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-30 md:left-auto md:right-4"
+        title="הצג שוב אפשרות התקנה"
+      >
+        <Download className="w-5 h-5" />
+      </button>
     );
   }
 

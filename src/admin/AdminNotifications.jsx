@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Bell, Send, History, Trash2, Users } from 'lucide-react'
-import { collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp, getCountFromServer } from 'firebase/firestore'
+import { collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore'
 import { db } from '../firebase'
 
 const AdminNotifications = () => {
@@ -73,16 +73,6 @@ const AdminNotifications = () => {
 
       if (response.ok) {
         setMessage(`✅ ההודעה נשלחה ל-${data.successCount} מנויים!`)
-        
-        await addDoc(collection(db, 'notificationHistory'), {
-          title: notification.title,
-          body: notification.body,
-          link: notification.link,
-          sentAt: serverTimestamp(),
-          successCount: data.successCount,
-          failureCount: data.failureCount
-        })
-
         setNotification({ title: '', body: '', link: '' })
         loadHistory()
       } else {

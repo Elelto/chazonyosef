@@ -119,6 +119,16 @@ exports.handler = async (event, context) => {
       await batch.commit()
     }
 
+    await db.collection('notificationHistory').add({
+      title,
+      body,
+      link: link || '/',
+      sentAt: admin.firestore.FieldValue.serverTimestamp(),
+      successCount: response.successCount,
+      failureCount: response.failureCount
+    })
+    console.log('✅ Notification history saved')
+
     return {
       statusCode: 200,
       headers: {

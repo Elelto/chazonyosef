@@ -43,13 +43,17 @@ async function generateIcons() {
       console.log(`✅ נוצר: ${name} (${size}x${size})`);
     }
 
-    // Generate favicon.ico (using 32x32 size)
+    // Generate favicon.ico using the background-removed version
     const faviconPath = path.join(outputDir, 'favicon.ico');
-    await sharp(inputPath)
+    const faviconSourcePath = path.join(outputDir, 'AppLogoBgRemove.png');
+    
+    // Use AppLogoBgRemove.png for favicon (already has background removed)
+    await sharp(faviconSourcePath)
       .resize(32, 32, {
         fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
       })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .png()
       .toFile(faviconPath.replace('.ico', '-temp.png'));
     

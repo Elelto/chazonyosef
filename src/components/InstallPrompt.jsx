@@ -7,29 +7,47 @@ const InstallPrompt = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [isPermanentlyDismissed, setIsPermanentlyDismissed] = useState(false);
 
   useEffect(() => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    const dismissed = localStorage.getItem('pwa-install-permanently-dismissed') === 'true';
+    
+    console.log('🔍 InstallPrompt Debug:', {
+      isIOSDevice,
+      isInStandaloneMode,
+      isPermanentlyDismissed: dismissed,
+      userAgent: navigator.userAgent
+    });
     
     setIsIOS(isIOSDevice);
     setIsInstalled(isInStandaloneMode);
+    setIsPermanentlyDismissed(dismissed);
 
     if (isInStandaloneMode) {
       console.log('✅ האפליקציה כבר מותקנת');
       return;
     }
 
+    if (dismissed) {
+      console.log('🚫 המשתמש ביקש לא להציג יותר');
+      return;
+    }
+
     if (!isIOSDevice) {
+      console.log('⏰ מציג prompt בעוד 3 שניות...');
       setTimeout(() => {
         setShowPrompt(true);
+        console.log('✅ Prompt מוצג (אם יש deferredPrompt)');
       }, 3000);
     }
 
     const handleBeforeInstallPrompt = (e) => {
+      console.log('🎉 beforeinstallprompt event fired!');
       e.preventDefault();
       setDeferredPrompt(e);
-      console.log('📱 PWA התקנה זמינה');
+      console.log('📱 PWA התקנה זמינה - deferredPrompt נשמר');
     };
 
     const handleAppInstalled = () => {
@@ -74,7 +92,14 @@ const InstallPrompt = () => {
     setShowPrompt(false);
   };
 
-  if (isInstalled) {
+  const handlePermanentDismiss = () => {
+    setShowPrompt(false);
+    setIsPermanentlyDismissed(true);
+    localStorage.setItem('pwa-install-permanently-dismissed', 'true');
+    console.log('🚫 התקנה נדחתה לצמיתות');
+  };
+
+  if (isInstalled || isPermanentlyDismissed) {
     return null;
   }
 
@@ -165,9 +190,13 @@ const InstallPrompt = () => {
     return null;
   }
 
+  if (showPrompt && !deferredPrompt) {
+    console.warn('⚠️ showPrompt=true אבל אין deferredPrompt - הדפדפן עדיין לא אישר התקנה');
+  }
+
   return (
     <>
-      {showPrompt && deferredPrompt && (
+      {showPrompt && (
         <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-40 border border-gray-200 md:left-auto md:right-4 md:max-w-md">
           <button
             onClick={handleDismiss}
@@ -185,25 +214,50 @@ const InstallPrompt = () => {
               <h3 className="font-bold text-gray-900 mb-1">
                 התקן את חזון יוסף
               </h3>
-              <p className="text-sm text-gray-600 mb-3">
-                גישה מהירה, עבודה אופליין, וחוויית אפליקציה מלאה
-              </p>
               
-              <div className="flex gap-2">
-                <button
-                  onClick={handleInstallClick}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  התקן
-                </button>
-                <button
-                  onClick={handleDismiss}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                >
-                  אולי מאוחר יותר
-                </button>
-              </div>
+              {deferredPrompt ? (
+                <>
+                  <p className="text-sm text-gray-600 mb-3">
+                    גישה מהירה, עבודה אופליין, וחוויית אפליקציה מלאה
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleInstallClick}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      התקן עכשיו
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleDismiss}
+                        className="flex-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                      >
+                        מאוחר יותר
+                      </button>
+                      <button
+                        onClick={handlePermanentDismiss}
+                        className="flex-1 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                      >
+                        אל תציג שוב
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-3">
+                    כדי להתקין את האפליקציה, בקר באתר שוב בעוד כמה דקות. הדפדפן צריך לאשר שהאתר בטוח להתקנה.
+                  </p>
+                  <button
+                    onClick={handleDismiss}
+                    className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all"
+                  >
+                    הבנתי
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -212,6 +266,17 @@ const InstallPrompt = () => {
       {deferredPrompt && !showPrompt && (
         <button
           onClick={handleInstallClick}
+          className="fixed bottom-4 left-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40 md:left-auto md:right-4"
+          title="התקן אפליקציה"
+        >
+          <Download className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Permanent install button - shows always even without browser support */}
+      {!showPrompt && !deferredPrompt && !isIOS && (
+        <button
+          onClick={() => setShowPrompt(true)}
           className="fixed bottom-4 left-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-40 md:left-auto md:right-4"
           title="התקן אפליקציה"
         >

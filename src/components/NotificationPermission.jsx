@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Bell, BellOff, X } from 'lucide-react'
 import { getMessaging, getToken, onMessage } from 'firebase/messaging'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase'
 
 const NotificationPermission = () => {
   const [permission, setPermission] = useState(Notification.permission)
@@ -101,17 +99,25 @@ const NotificationPermission = () => {
         setToken(currentToken)
         localStorage.setItem('fcmToken', currentToken)
 
-        await setDoc(doc(db, 'fcmTokens', currentToken), {
-          token: currentToken,
-          createdAt: serverTimestamp(),
-          lastUpdated: serverTimestamp(),
-          userAgent: navigator.userAgent,
-          platform: navigator.platform
-        }, { merge: true })
+        const response = await fetch('/.netlify/functions/register-fcm-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: currentToken,
+            userAgent: navigator.userAgent,
+            platform: navigator.platform
+          })
+        })
+
+        if (response.ok) {
+          console.log('✅ Token saved to Firestore')
+        } else {
+          console.error('❌ Failed to save token:', await response.text())
+        }
 
         setupMessageListener()
-        
-        console.log('✅ Token saved to Firestore')
       } else {
         console.warn('⚠️ No registration token available')
       }
