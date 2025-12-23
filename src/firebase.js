@@ -1,6 +1,6 @@
 // Firebase configuration and initialization
 import { initializeApp } from 'firebase/app'
-import { getFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { getMessaging, isSupported } from 'firebase/messaging'
 
@@ -19,7 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 
 // Initialize Firestore with modern cache API (supports multiple tabs)
-export const db = getFirestore(app, {
+export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
   })
