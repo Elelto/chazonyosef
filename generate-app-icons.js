@@ -19,11 +19,11 @@ const sizes = [
 ];
 
 async function generateIcons() {
-  const inputPath = path.join(__dirname, 'public', 'AppLogo.png');
+  const inputPath = path.join(__dirname, 'public', 'AppLogoBgRemove.png');
   const outputDir = path.join(__dirname, 'public');
 
   try {
-    console.log('🎨 מתחיל ליצור אייקונים מ-AppLogo.png...\n');
+    console.log('🎨 מתחיל ליצור אייקונים מ-AppLogoBgRemove.png...\n');
 
     // Check if input file exists
     await fs.access(inputPath);
@@ -35,8 +35,9 @@ async function generateIcons() {
       await sharp(inputPath)
         .resize(size, size, {
           fit: 'contain',
-          background: { r: 0, g: 0, b: 0, alpha: 0 }
+          background: { r: 255, g: 255, b: 255, alpha: 1 }
         })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
         .png()
         .toFile(outputPath);
       
