@@ -22,11 +22,20 @@ const PWAStatus = () => {
       navigator.serviceWorker.ready.then(reg => {
         setRegistration(reg);
 
+        // Check if there's already a waiting worker
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          console.log('⚠️ Update already waiting');
+          setUpdateAvailable(true);
+        }
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
+          console.log('🔄 Update found, installing...');
           
           newWorker.addEventListener('statechange', () => {
+            console.log('📦 New worker state:', newWorker.state);
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('✅ Update installed and ready');
               setUpdateAvailable(true);
             }
           });

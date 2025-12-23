@@ -12,10 +12,14 @@ const InstallPrompt = () => {
   useEffect(() => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    const isStandaloneIOS = window.navigator.standalone === true;
     const dismissed = localStorage.getItem('pwa-install-permanently-dismissed') === 'true';
     
+    // Check multiple ways if app is installed
+    const isAppInstalled = isInStandaloneMode || isStandaloneIOS;
+    
     // Check if deferredPrompt was already captured globally
-    if (window.deferredPrompt) {
+    if (window.deferredPrompt && !isAppInstalled) {
       console.log('✅ Using globally captured deferredPrompt');
       setDeferredPrompt(window.deferredPrompt);
     }
@@ -23,16 +27,18 @@ const InstallPrompt = () => {
     console.log('🔍 InstallPrompt Debug:', {
       isIOSDevice,
       isInStandaloneMode,
+      isStandaloneIOS,
+      isAppInstalled,
       isPermanentlyDismissed: dismissed,
       hasDeferredPrompt: !!window.deferredPrompt,
       userAgent: navigator.userAgent
     });
     
     setIsIOS(isIOSDevice);
-    setIsInstalled(isInStandaloneMode);
+    setIsInstalled(isAppInstalled);
     setIsPermanentlyDismissed(dismissed);
 
-    if (isInStandaloneMode) {
+    if (isAppInstalled) {
       console.log('✅ האפליקציה כבר מותקנת');
       return;
     }
