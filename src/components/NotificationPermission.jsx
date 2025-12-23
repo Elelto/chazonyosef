@@ -68,9 +68,12 @@ const NotificationPermission = () => {
 
   const registerToken = async () => {
     try {
+      console.log('🔔 Starting FCM token registration...')
+      
       // Send Firebase config to service worker
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready
+        console.log('✅ Service Worker ready')
         registration.active?.postMessage({
           type: 'FIREBASE_CONFIG',
           config: {
@@ -82,23 +85,31 @@ const NotificationPermission = () => {
             appId: "1:553870721683:web:e24bc7d0a90e8752df0366"
           }
         })
+        console.log('📤 Firebase config sent to Service Worker')
       }
 
       const messaging = getMessaging()
+      console.log('✅ Firebase Messaging instance obtained')
       
       const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY
       if (!vapidKey) {
-        console.error('❌ VAPID key not found')
+        console.error('❌ VAPID key not found in environment variables')
+        setMessage('❌ שגיאה: מפתח VAPID חסר')
+        setTimeout(() => setMessage(''), 3000)
         return
       }
+      console.log('✅ VAPID key found:', vapidKey.substring(0, 20) + '...')
 
+      console.log('🔄 Requesting FCM token...')
       const currentToken = await getToken(messaging, { vapidKey })
       
       if (currentToken) {
-        console.log('✅ FCM Token:', currentToken)
+        console.log('✅ FCM Token received:', currentToken.substring(0, 30) + '...')
         setToken(currentToken)
         localStorage.setItem('fcmToken', currentToken)
+        console.log('💾 Token saved to localStorage')
 
+        console.log('📤 Sending token to backend...')
         const response = await fetch('/.netlify/functions/register-fcm-token', {
           method: 'POST',
           headers: {
@@ -111,18 +122,32 @@ const NotificationPermission = () => {
           })
         })
 
+        const responseData = await response.json()
+        console.log('📥 Backend response:', responseData)
+
         if (response.ok) {
-          console.log('✅ Token saved to Firestore')
+          console.log('✅ Token successfully saved to Firestore!')
         } else {
-          console.error('❌ Failed to save token:', await response.text())
+          console.error('❌ Failed to save token to Firestore:', responseData)
+          setMessage('❌ שגיאה בשמירת הטוקן')
+          setTimeout(() => setMessage(''), 3000)
         }
 
         setupMessageListener()
       } else {
-        console.warn('⚠️ No registration token available')
+        console.warn('⚠️ No registration token available - check browser support')
+        setMessage('⚠️ הדפדפן לא תומך בהודעות Push')
+        setTimeout(() => setMessage(''), 3000)
       }
     } catch (error) {
-      console.error('❌ Error getting token:', error)
+      console.error('❌ Error in registerToken:', error)
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        code: error.code
+      })
+      setMessage('❌ שגיאה ברישום להודעות')
+      setTimeout(() => setMessage(''), 3000)
     }
   }
 
@@ -131,7 +156,10 @@ const NotificationPermission = () => {
     localStorage.setItem('notificationAsked', 'true')
   }
 
-  if (!showPrompt && !message) return null
+  // Show permanent button if notifications are not granted
+  const showPermanentButton = permission !== 'granted' && !showPrompt && !message
+
+  if (!showPrompt && !message && !showPermanentButton) return null
 
   return (
     <>
@@ -181,6 +209,19 @@ const NotificationPermission = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showPermanentButton && (
+        <button
+          onClick={() => setShowPrompt(true)}
+          className="fixed bottom-32 left-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all z-30 md:left-auto md:right-4 group"
+          title="הירשם להודעות Push"
+        >
+          <Bell className="w-5 h-5" />
+          <span className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            קבל עדכונים חשובים
+          </span>
+        </button>
       )}
     </>
   )

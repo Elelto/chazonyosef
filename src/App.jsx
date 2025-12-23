@@ -65,7 +65,7 @@ function AppContent() {
       <div className="min-h-screen flex flex-col">
         {isProduction && <PWAStatus />}
         {isProduction && <InstallPrompt />}
-        {isProduction && <NotificationPermission />}
+        <NotificationPermission />
         <UrgentPopup />
         <HolidayElementManager />
         <Navbar />
