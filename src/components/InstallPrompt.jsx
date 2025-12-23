@@ -116,8 +116,17 @@ const InstallPrompt = () => {
   };
 
   if (isInstalled || isPermanentlyDismissed) {
+    console.log('❌ Not showing install prompt:', { isInstalled, isPermanentlyDismissed });
     return null;
   }
+  
+  console.log('✅ Showing install prompt area:', { 
+    isInstalled, 
+    isPermanentlyDismissed, 
+    showPrompt, 
+    hasDeferredPrompt: !!deferredPrompt,
+    isIOS 
+  });
 
   if (showIOSInstructions) {
     return (

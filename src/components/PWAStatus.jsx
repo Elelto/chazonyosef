@@ -70,6 +70,7 @@ const PWAStatus = () => {
   };
 
   if (updateAvailable) {
+    console.log('🔔 Showing update notification');
     return (
       <div className="fixed top-20 left-4 right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl shadow-lg z-[9999] md:left-auto md:right-4 md:max-w-md">
         <div className="flex items-center justify-between gap-3">
