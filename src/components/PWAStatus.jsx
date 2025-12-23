@@ -28,19 +28,13 @@ const PWAStatus = () => {
       navigator.serviceWorker.ready.then(reg => {
         setRegistration(reg);
 
-        // Check if there's already a waiting worker (real update pending)
-        if (reg.waiting && navigator.serviceWorker.controller) {
-          console.log('⚠️ Real update already waiting', {
-            hasWaiting: !!reg.waiting,
-            hasController: !!navigator.serviceWorker.controller
-          });
-          setUpdateAvailableWithLog(true);
-        } else {
-          console.log('ℹ️ No waiting worker on load', {
-            hasWaiting: !!reg.waiting,
-            hasController: !!navigator.serviceWorker.controller
-          });
-        }
+        console.log('ℹ️ Service Worker ready', {
+          hasWaiting: !!reg.waiting,
+          hasController: !!navigator.serviceWorker.controller
+        });
+
+        // Don't check for waiting worker on load - it can be from previous install
+        // Only show update notification when updatefound event fires
 
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
