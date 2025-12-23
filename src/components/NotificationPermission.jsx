@@ -45,20 +45,37 @@ const NotificationPermission = () => {
 
   const requestPermission = async () => {
     try {
+      console.log('🔔 Requesting notification permission...')
+      console.log('Current permission status:', Notification.permission)
+      
+      // Check if already blocked
+      if (Notification.permission === 'denied') {
+        console.warn('⚠️ Notifications already blocked')
+        setMessage('❌ הודעות חסומות. לאפשור: לחץ על הנעילה ליד כתובת האתר ← הרשאות ← הודעות ← אפשר')
+        setTimeout(() => setMessage(''), 6000)
+        setShowPrompt(false)
+        return
+      }
+      
       localStorage.setItem('notificationAsked', 'true')
       
       const result = await Notification.requestPermission()
+      console.log('Permission result:', result)
       setPermission(result)
 
       if (result === 'granted') {
         await registerToken()
         setMessage('✅ הודעות הופעלו בהצלחה!')
+      } else if (result === 'denied') {
+        console.warn('⚠️ Notifications blocked by user')
+        setMessage('❌ הודעות נחסמו. לאפשור: לחץ על הנעילה ליד כתובת האתר ← הרשאות ← הודעות ← אפשר')
       } else {
-        setMessage('❌ הרשאות הודעות נדחו')
+        console.warn('⚠️ Notification permission dismissed')
+        setMessage('ℹ️ לא ניתנה הרשאה. נסה שוב מאוחר יותר')
       }
 
       setShowPrompt(false)
-      setTimeout(() => setMessage(''), 3000)
+      setTimeout(() => setMessage(''), 5000)
     } catch (error) {
       console.error('❌ Error requesting permission:', error)
       setMessage('שגיאה בבקשת הרשאות')
@@ -164,9 +181,21 @@ const NotificationPermission = () => {
   return (
     <>
       {message && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
-          <div className="bg-white shadow-lg rounded-lg p-4 border border-slate-200">
-            <p className="text-slate-800">{message}</p>
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in max-w-md mx-4">
+          <div className={`shadow-lg rounded-lg p-4 border ${
+            message.includes('✅') 
+              ? 'bg-green-50 border-green-200'
+              : message.includes('❌')
+              ? 'bg-red-50 border-red-200'
+              : 'bg-blue-50 border-blue-200'
+          }`}>
+            <p className={`text-sm ${
+              message.includes('✅') 
+                ? 'text-green-800'
+                : message.includes('❌')
+                ? 'text-red-800'
+                : 'text-blue-800'
+            }`}>{message}</p>
           </div>
         </div>
       )}
