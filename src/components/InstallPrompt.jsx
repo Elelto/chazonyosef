@@ -14,10 +14,17 @@ const InstallPrompt = () => {
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
     const dismissed = localStorage.getItem('pwa-install-permanently-dismissed') === 'true';
     
+    // Check if deferredPrompt was already captured globally
+    if (window.deferredPrompt) {
+      console.log('✅ Using globally captured deferredPrompt');
+      setDeferredPrompt(window.deferredPrompt);
+    }
+    
     console.log('🔍 InstallPrompt Debug:', {
       isIOSDevice,
       isInStandaloneMode,
       isPermanentlyDismissed: dismissed,
+      hasDeferredPrompt: !!window.deferredPrompt,
       userAgent: navigator.userAgent
     });
     
@@ -44,9 +51,10 @@ const InstallPrompt = () => {
     }
 
     const handleBeforeInstallPrompt = (e) => {
-      console.log('🎉 beforeinstallprompt event fired!');
+      console.log('🎉 beforeinstallprompt event fired in component!');
       e.preventDefault();
       setDeferredPrompt(e);
+      window.deferredPrompt = e;
       console.log('📱 PWA התקנה זמינה - deferredPrompt נשמר');
     };
 
@@ -55,6 +63,7 @@ const InstallPrompt = () => {
       setIsInstalled(true);
       setShowPrompt(false);
       setDeferredPrompt(null);
+      window.deferredPrompt = null;
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -85,6 +94,7 @@ const InstallPrompt = () => {
     }
 
     setDeferredPrompt(null);
+    window.deferredPrompt = null;
     setShowPrompt(false);
   };
 

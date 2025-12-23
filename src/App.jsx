@@ -24,10 +24,23 @@ function AppContent() {
   const { gradientLoaded } = useGradient()
 
   useEffect(() => {
+    // Capture beforeinstallprompt event globally and store it
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      window.deferredPrompt = e
+      console.log('🎉 beforeinstallprompt captured globally')
+    }
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    
     // Force HTTPS redirect
     if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
       window.location.href = window.location.href.replace('http:', 'https:')
       return
+    }
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
 
     // Initialize Netlify Identity
