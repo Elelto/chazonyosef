@@ -62,18 +62,18 @@ const PWAStatus = () => {
 
   if (updateAvailable) {
     return (
-      <div className="fixed top-4 left-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-lg z-50 md:left-auto md:right-4 md:max-w-md">
+      <div className="fixed top-20 left-4 right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl shadow-lg z-[9999] md:left-auto md:right-4 md:max-w-md">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <RefreshCw className="w-5 h-5" />
             <div className="text-right">
               <p className="font-semibold">עדכון זמין!</p>
-              <p className="text-sm text-green-100">גרסה חדשה של האפליקציה מוכנה</p>
+              <p className="text-sm text-blue-100">גרסה חדשה של האפליקציה מוכנה</p>
             </div>
           </div>
           <button
             onClick={handleUpdate}
-            className="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-green-50 transition-colors whitespace-nowrap"
+            className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors whitespace-nowrap"
           >
             עדכן עכשיו
           </button>
