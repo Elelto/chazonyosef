@@ -46,7 +46,7 @@ self.addEventListener('install', (event) => {
         console.log('[Service Worker] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(() => self.skipWaiting())
+      // Don't auto-skip waiting - let user decide when to update
   );
 });
 
