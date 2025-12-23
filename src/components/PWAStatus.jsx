@@ -58,8 +58,27 @@ const PWAStatus = () => {
   }, []);
 
   const handleUpdate = () => {
+    console.log('🔄 Update button clicked', { 
+      hasRegistration: !!registration, 
+      hasWaiting: !!(registration?.waiting) 
+    });
+    
     if (registration && registration.waiting) {
+      console.log('📤 Sending SKIP_WAITING message to service worker');
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      
+      // Also try to update directly
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      
+      // Set a timeout to reload if SW doesn't respond
+      setTimeout(() => {
+        console.log('⏰ Force reloading after timeout');
+        window.location.reload();
+      }, 1000);
+    } else {
+      console.error('❌ No registration or waiting worker found');
+      // Try to reload anyway
+      window.location.reload();
     }
   };
 

@@ -15,8 +15,13 @@ const InstallPrompt = () => {
     const isStandaloneIOS = window.navigator.standalone === true;
     const dismissed = localStorage.getItem('pwa-install-permanently-dismissed') === 'true';
     
-    // Check multiple ways if app is installed
-    const isAppInstalled = isInStandaloneMode || isStandaloneIOS;
+    // Additional checks for installed state
+    const displayMode = window.matchMedia('(display-mode: standalone)').matches ? 'standalone' :
+                       window.matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' :
+                       window.matchMedia('(display-mode: minimal-ui)').matches ? 'minimal-ui' : 'browser';
+    
+    // Check if running as installed app
+    const isAppInstalled = isInStandaloneMode || isStandaloneIOS || displayMode !== 'browser';
     
     // Check if deferredPrompt was already captured globally
     if (window.deferredPrompt && !isAppInstalled) {
@@ -28,9 +33,11 @@ const InstallPrompt = () => {
       isIOSDevice,
       isInStandaloneMode,
       isStandaloneIOS,
+      displayMode,
       isAppInstalled,
       isPermanentlyDismissed: dismissed,
       hasDeferredPrompt: !!window.deferredPrompt,
+      windowLocation: window.location.href,
       userAgent: navigator.userAgent
     });
     
