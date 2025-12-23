@@ -33,36 +33,13 @@ const PWAStatus = () => {
           hasController: !!navigator.serviceWorker.controller
         });
 
-        // Don't check for waiting worker on load - it can be from previous install
-        // Only show update notification when updatefound event fires
-
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          const hasController = !!navigator.serviceWorker.controller;
-          
-          console.log('🔄 Update found, new worker installing...', { hasController });
-          
-          // If there's no controller, this is the first install - don't show update
-          if (!hasController) {
-            console.log('ℹ️ First install detected - skipping update notification');
-            return;
-          }
-          
-          newWorker.addEventListener('statechange', () => {
-            console.log('📦 New worker state:', newWorker.state, { hasController });
-            
-            // Only show update if:
-            // 1. There's a controller (not first install)
-            // 2. New worker is installed (ready to take over)
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('✅ Real update installed and waiting for user action', {
-                workerState: newWorker.state,
-                hasController: !!navigator.serviceWorker.controller
-              });
-              setUpdateAvailableWithLog(true);
-            }
-          });
-        });
+        // Disable automatic update detection - it's too sensitive
+        // Every code deployment triggers it, even without real changes
+        // Users can manually refresh when they want the latest version
+        
+        // reg.addEventListener('updatefound', () => {
+        //   // Disabled to prevent false positive update notifications
+        // });
       });
 
       let refreshing = false;
