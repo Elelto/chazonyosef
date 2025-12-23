@@ -282,12 +282,23 @@ const InstallPrompt = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     כדי להתקין את האפליקציה, בקר באתר שוב בעוד כמה דקות. הדפדפן צריך לאשר שהאתר בטוח להתקנה.
                   </p>
-                  <button
-                    onClick={handleDismiss}
-                    className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all"
-                  >
-                    הבנתי
-                  </button>
+                  <p className="text-xs text-gray-500 mb-3 bg-blue-50 p-2 rounded border border-blue-100">
+                    💡 <strong>כבר התקנת את האפליקציה?</strong> פתח אותה מהאייקון במסך הבית ולא מהדפדפן, וההודעה הזו לא תופיע.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDismiss}
+                      className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-all"
+                    >
+                      הבנתי
+                    </button>
+                    <button
+                      onClick={handlePermanentDismiss}
+                      className="flex-1 bg-gray-100 text-gray-600 py-2 px-3 rounded-lg text-sm hover:bg-gray-200 transition-all"
+                    >
+                      אל תציג שוב
+                    </button>
+                  </div>
                 </>
               )}
             </div>
