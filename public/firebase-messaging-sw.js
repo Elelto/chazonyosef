@@ -1,37 +1,37 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js')
 
-let firebaseConfig = null
+let messaging = null
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'FIREBASE_CONFIG') {
-    firebaseConfig = event.data.config
+    const firebaseConfig = event.data.config
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig)
       console.log('✅ Firebase initialized in SW with config from main app')
+      
+      messaging = firebase.messaging()
+      
+      messaging.onBackgroundMessage((payload) => {
+        console.log('[firebase-messaging-sw.js] Received background message:', payload)
+        
+        const notificationTitle = payload.notification?.title || 'חזון יוסף'
+        const notificationOptions = {
+          body: payload.notification?.body || 'עדכון חדש',
+          icon: '/icon-192.png',
+          badge: '/icon-72.png',
+          dir: 'rtl',
+          lang: 'he',
+          vibrate: [200, 100, 200],
+          data: {
+            url: payload.data?.link || '/'
+          }
+        }
+
+        self.registration.showNotification(notificationTitle, notificationOptions)
+      })
     }
   }
-})
-
-const messaging = firebase.messaging()
-
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message:', payload)
-  
-  const notificationTitle = payload.notification?.title || 'חזון יוסף'
-  const notificationOptions = {
-    body: payload.notification?.body || 'עדכון חדש',
-    icon: '/icon-192.png',
-    badge: '/icon-72.png',
-    dir: 'rtl',
-    lang: 'he',
-    vibrate: [200, 100, 200],
-    data: {
-      url: payload.data?.link || '/'
-    }
-  }
-
-  self.registration.showNotification(notificationTitle, notificationOptions)
 })
 
 self.addEventListener('notificationclick', (event) => {
