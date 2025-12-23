@@ -30,17 +30,25 @@ const PWAStatus = () => {
 
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
-          console.log('🔄 Update found, new worker installing...');
+          const hasController = !!navigator.serviceWorker.controller;
+          
+          console.log('🔄 Update found, new worker installing...', { hasController });
+          
+          // If there's no controller, this is the first install - don't show update
+          if (!hasController) {
+            console.log('ℹ️ First install detected - skipping update notification');
+            return;
+          }
           
           newWorker.addEventListener('statechange', () => {
-            console.log('📦 New worker state:', newWorker.state);
-            // Only show update if there's a controller (not first install)
-            // AND the new worker is in waiting state (not auto-activated)
+            console.log('📦 New worker state:', newWorker.state, { hasController });
+            
+            // Only show update if:
+            // 1. There's a controller (not first install)
+            // 2. New worker is installed (ready to take over)
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               console.log('✅ Real update installed and waiting for user action');
               setUpdateAvailable(true);
-            } else if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
-              console.log('ℹ️ First install - no update notification needed');
             }
           });
         });
