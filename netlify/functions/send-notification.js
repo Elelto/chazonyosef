@@ -62,7 +62,10 @@ exports.handler = async (event, context) => {
     }
 
     const tokens = tokensSnapshot.docs.map(doc => doc.data().token)
-    console.log(`📱 Found ${tokens.length} tokens`)
+    console.log(`📱 Found ${tokens.length} tokens:`)
+    tokens.forEach((token, idx) => {
+      console.log(`  Token ${idx + 1}: ${token.substring(0, 30)}...`)
+    })
 
     const message = {
       notification: {
@@ -90,6 +93,9 @@ exports.handler = async (event, context) => {
       }
     }
 
+    console.log('📨 Message payload:', JSON.stringify(message, null, 2))
+    console.log('🚀 Sending to FCM...')
+
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
       ...message
@@ -97,11 +103,27 @@ exports.handler = async (event, context) => {
 
     console.log(`✅ Successfully sent: ${response.successCount}`)
     console.log(`❌ Failed: ${response.failureCount}`)
+    
+    if (response.failureCount > 0) {
+      console.log('📋 Detailed response:')
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.log(`  Token ${idx + 1} failed:`, {
+            token: tokens[idx].substring(0, 30) + '...',
+            error: resp.error?.code,
+            message: resp.error?.message
+          })
+        } else {
+          console.log(`  Token ${idx + 1} success:`, resp.messageId)
+        }
+      })
+    }
 
     const invalidTokens = []
     response.responses.forEach((resp, idx) => {
       if (!resp.success) {
         const error = resp.error
+        console.log(`⚠️ Error for token ${idx + 1}:`, error.code, error.message)
         if (error.code === 'messaging/invalid-registration-token' ||
             error.code === 'messaging/registration-token-not-registered') {
           invalidTokens.push(tokens[idx])

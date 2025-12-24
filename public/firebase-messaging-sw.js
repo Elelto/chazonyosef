@@ -11,9 +11,13 @@ self.addEventListener('message', (event) => {
       console.log('✅ Firebase initialized in SW with config from main app')
       
       messaging = firebase.messaging()
+      console.log('✅ Firebase Messaging initialized in SW')
       
       messaging.onBackgroundMessage((payload) => {
-        console.log('[firebase-messaging-sw.js] Received background message:', payload)
+        console.log('🔔 [SW] Background message received!')
+        console.log('📦 [SW] Full payload:', JSON.stringify(payload, null, 2))
+        console.log('📧 [SW] Notification data:', payload.notification)
+        console.log('📎 [SW] Custom data:', payload.data)
         
         const notificationTitle = payload.notification?.title || 'חזון יוסף'
         const notificationOptions = {
@@ -28,7 +32,15 @@ self.addEventListener('message', (event) => {
           }
         }
 
-        self.registration.showNotification(notificationTitle, notificationOptions)
+        console.log('🔔 [SW] Showing notification:', notificationTitle, notificationOptions)
+        
+        return self.registration.showNotification(notificationTitle, notificationOptions)
+          .then(() => {
+            console.log('✅ [SW] Notification displayed successfully')
+          })
+          .catch(error => {
+            console.error('❌ [SW] Error showing notification:', error)
+          })
       })
     }
   }

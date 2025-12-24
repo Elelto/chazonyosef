@@ -24,20 +24,45 @@ const NotificationPermission = () => {
 
   const setupMessageListener = () => {
     try {
+      console.log('🎧 Setting up foreground message listener...')
       const messaging = getMessaging()
+      
       onMessage(messaging, (payload) => {
-        console.log('📩 Message received:', payload)
+        console.log('🔔 [FOREGROUND] Message received!')
+        console.log('📦 [FOREGROUND] Full payload:', payload)
+        console.log('📧 [FOREGROUND] Notification:', payload.notification)
+        console.log('📎 [FOREGROUND] Data:', payload.data)
+        console.log('🔐 [FOREGROUND] Permission status:', Notification.permission)
         
         if (Notification.permission === 'granted') {
-          new Notification(payload.notification.title, {
+          console.log('✅ [FOREGROUND] Permission granted, showing notification...')
+          
+          const notification = new Notification(payload.notification.title, {
             body: payload.notification.body,
             icon: '/icon-192.png',
             badge: '/icon-72.png',
             dir: 'rtl',
-            lang: 'he'
+            lang: 'he',
+            tag: 'chazon-yosef-notification',
+            requireInteraction: false
           })
+          
+          notification.onclick = () => {
+            console.log('🖱️ [FOREGROUND] Notification clicked')
+            window.focus()
+            notification.close()
+            if (payload.data?.link) {
+              window.location.href = payload.data.link
+            }
+          }
+          
+          console.log('✅ [FOREGROUND] Notification displayed')
+        } else {
+          console.warn('⚠️ [FOREGROUND] Permission not granted:', Notification.permission)
         }
       })
+      
+      console.log('✅ Message listener setup complete')
     } catch (error) {
       console.error('❌ Error setting up message listener:', error)
     }
