@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -59,6 +59,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Safari-specific styles for notched devices -->
+    <style>
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+    </style>
+    
     <!-- Netlify Identity Widget -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     
@@ -66,6 +76,10 @@
     <script>
       (function() {
         try {
+          if (typeof localStorage === 'undefined') {
+            console.warn('localStorage not available');
+            return;
+          }
           const saved = localStorage.getItem('siteSettings');
           if (saved) {
             const settings = JSON.parse(saved);
@@ -308,27 +322,36 @@
     <script>
       if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
         window.addEventListener('load', () => {
-          // Register main service worker
-          navigator.serviceWorker.register('/service-worker.js')
+          // Register main service worker with iOS-friendly options
+          navigator.serviceWorker.register('/service-worker.js', { 
+            scope: '/',
+            updateViaCache: 'none'
+          })
             .then(registration => {
               console.log('✅ Service Worker registered successfully:', registration.scope);
               
-              // Check for updates periodically
-              setInterval(() => {
-                registration.update();
-              }, 60000); // Check every minute
+              // Check for updates periodically (less aggressive for iOS)
+              if (registration.update) {
+                setInterval(() => {
+                  registration.update();
+                }, 300000); // Check every 5 minutes instead of 1
+              }
             })
             .catch(error => {
               console.error('❌ Service Worker registration failed:', error);
+              // Continue without service worker on iOS if it fails
             });
           
-          // Register Firebase Messaging service worker
-          navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          // Register Firebase Messaging service worker (may not work on iOS Safari)
+          navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+            scope: '/firebase-cloud-messaging-push-scope'
+          })
             .then(registration => {
               console.log('✅ Firebase Messaging SW registered:', registration.scope);
             })
             .catch(error => {
-              console.error('❌ Firebase Messaging SW registration failed:', error);
+              console.warn('⚠️ Firebase Messaging SW not available (expected on iOS):', error.message);
+              // This is expected on iOS Safari - not a critical error
             });
         });
       } else if ('serviceWorker' in navigator) {

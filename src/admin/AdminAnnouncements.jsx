@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MessageSquare, Plus, Trash2, Save, Edit2 } from 'lucide-react'
+import { MessageSquare, Plus, Trash2, Save, Edit2, X } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
 const AdminAnnouncements = () => {
@@ -8,6 +8,7 @@ const AdminAnnouncements = () => {
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
 
   useEffect(() => {
     loadAnnouncements()
@@ -70,12 +71,19 @@ const AdminAnnouncements = () => {
   }
 
   const handleDelete = (id) => {
-    if (confirm('האם אתה בטוח שברצונך למחוק הודעה זו?')) {
-      const updatedAnnouncements = announcements.filter(ann => ann.id !== id)
-      setAnnouncements(updatedAnnouncements)
-      setMessage('הודעה נמחקה בהצלחה!')
-      setTimeout(() => setMessage(''), 3000)
-    }
+    setDeleteConfirm(id)
+  }
+
+  const confirmDelete = () => {
+    const updatedAnnouncements = announcements.filter(ann => ann.id !== deleteConfirm)
+    setAnnouncements(updatedAnnouncements)
+    setMessage('הודעה נמחקה בהצלחה!')
+    setTimeout(() => setMessage(''), 3000)
+    setDeleteConfirm(null)
+  }
+
+  const cancelDelete = () => {
+    setDeleteConfirm(null)
   }
 
   const handleSave = async () => {
@@ -100,6 +108,38 @@ const AdminAnnouncements = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-slate-800">אישור מחיקה</h3>
+              <button
+                onClick={cancelDelete}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <p className="text-slate-600 mb-6">האם אתה בטוח שברצונך למחוק הודעה זו?</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg transition-colors font-medium"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+              >
+                מחק
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
