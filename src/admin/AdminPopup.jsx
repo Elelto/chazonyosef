@@ -280,7 +280,7 @@ const AdminPopup = () => {
     if (!currentPopup) return null
 
     return (
-      <div className="space-y-6 overflow-x-hidden max-w-full">
+      <div key={currentPopup.id} className="space-y-6 overflow-x-hidden max-w-full">
         <div className="card overflow-x-hidden">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
@@ -546,7 +546,12 @@ const AdminPopup = () => {
     )
   }
 
-  return viewMode === 'list' ? <ListView /> : <EditView />
+  return (
+    <>
+      {viewMode === 'list' && <ListView />}
+      {viewMode === 'edit' && currentPopup && <EditView key={`edit-${currentPopup.id}`} />}
+    </>
+  )
 }
 
 export default AdminPopup
