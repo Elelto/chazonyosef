@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MessageSquare, Plus, Trash2, Save, Edit2, X } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 
@@ -32,19 +32,21 @@ const AdminAnnouncements = () => {
     }
   }
 
-  const handleAddOrUpdate = () => {
+  const handleAddOrUpdate = async () => {
     if (!newAnnouncement.title || !newAnnouncement.content) {
       setMessage('נא למלא כותרת ותוכן')
       return
     }
 
+    setSaving(true)
+    let updatedAnnouncements
+
     if (editingId) {
       // Update existing
-      const updatedAnnouncements = announcements.map(ann =>
+      updatedAnnouncements = announcements.map(ann =>
         ann.id === editingId ? { ...newAnnouncement, id: editingId } : ann
       )
       setAnnouncements(updatedAnnouncements)
-      setMessage('הודעה עודכנה בהצלחה!')
       setEditingId(null)
     } else {
       // Add new
@@ -53,12 +55,25 @@ const AdminAnnouncements = () => {
         ...newAnnouncement,
         date: new Date().toISOString()
       }
-      setAnnouncements([announcementToAdd, ...announcements])
-      setMessage('הודעה נוספה בהצלחה!')
+      updatedAnnouncements = [announcementToAdd, ...announcements]
+      setAnnouncements(updatedAnnouncements)
     }
 
     setNewAnnouncement({ title: '', content: '', priority: 'normal' })
-    setTimeout(() => setMessage(''), 3000)
+
+    // Auto-save to Firebase
+    try {
+      await saveToFirebase('firebase-announcements', { announcements: updatedAnnouncements })
+      localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements))
+      setMessage(editingId ? '✅ הודעה עודכנה ונשמרה בהצלחה!' : '✅ הודעה נוספה ונשמרה בהצלחה!')
+      console.log('✅ Announcement saved automatically')
+    } catch (error) {
+      console.error('❌ Error auto-saving announcement:', error)
+      setMessage('הודעה נוספה אך לא נשמרה. לחץ על "שמור שינויים"')
+    } finally {
+      setSaving(false)
+      setTimeout(() => setMessage(''), 3000)
+    }
   }
 
   const handleEdit = (announcement) => {
@@ -70,16 +85,29 @@ const AdminAnnouncements = () => {
     setEditingId(announcement.id)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = useCallback((id) => {
     setDeleteConfirm(id)
-  }
+  }, [])
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    setSaving(true)
     const updatedAnnouncements = announcements.filter(ann => ann.id !== deleteConfirm)
     setAnnouncements(updatedAnnouncements)
-    setMessage('הודעה נמחקה בהצלחה!')
-    setTimeout(() => setMessage(''), 3000)
     setDeleteConfirm(null)
+
+    // Auto-save after delete
+    try {
+      await saveToFirebase('firebase-announcements', { announcements: updatedAnnouncements })
+      localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements))
+      setMessage('✅ הודעה נמחקה ונשמרה בהצלחה!')
+      console.log('✅ Announcement deleted and saved automatically')
+    } catch (error) {
+      console.error('❌ Error auto-saving after delete:', error)
+      setMessage('הודעה נמחקה אך לא נשמרה. לחץ על "שמור שינויים"')
+    } finally {
+      setSaving(false)
+      setTimeout(() => setMessage(''), 3000)
+    }
   }
 
   const cancelDelete = () => {
@@ -173,8 +201,8 @@ const AdminAnnouncements = () => {
               <input
                 type="text"
                 value={newAnnouncement.title}
-                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                className="input-field max-w-full"
+                onChange={(e) => setNewAnnouncement(prev => ({ ...prev, title: e.target.value }))}
+                className="input-field max-w-full w-full"
                 placeholder="כותרת ההודעה"
               />
             </div>
@@ -182,8 +210,8 @@ const AdminAnnouncements = () => {
               <label className="block text-slate-700 font-medium mb-2">תוכן *</label>
               <textarea
                 value={newAnnouncement.content}
-                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
-                className="input-field resize-none max-w-full"
+                onChange={(e) => setNewAnnouncement(prev => ({ ...prev, content: e.target.value }))}
+                className="input-field resize-none max-w-full w-full"
                 rows="4"
                 placeholder="תוכן ההודעה"
               ></textarea>
@@ -192,8 +220,8 @@ const AdminAnnouncements = () => {
               <label className="block text-slate-700 font-medium mb-2">עדיפות</label>
               <select
                 value={newAnnouncement.priority}
-                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })}
-                className="input-field"
+                onChange={(e) => setNewAnnouncement(prev => ({ ...prev, priority: e.target.value }))}
+                className="input-field w-full"
               >
                 <option value="low">נמוכה</option>
                 <option value="normal">רגילה</option>
