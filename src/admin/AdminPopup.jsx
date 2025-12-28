@@ -292,12 +292,18 @@ const AdminPopup = () => {
 
   const loadPopupSettings = async () => {
     try {
+      console.log('📥 Loading popup settings...')
       const data = await fetchFromFirebase('firebase-popup')
+      console.log('📦 Received data from Firebase:', data)
       
       if (data && data.popups) {
+        console.log('✅ Setting popups array:', data.popups.length, 'items')
         setPopups(data.popups)
       } else if (data && data.popup) {
+        console.log('✅ Setting single popup as array')
         setPopups([data.popup])
+      } else {
+        console.log('⚠️ No popup data found in Firebase')
       }
     } catch (error) {
       console.error('❌ Error loading popup settings:', error)
@@ -390,12 +396,17 @@ const AdminPopup = () => {
       if (editingIndex !== null) {
         newPopups = [...popups]
         newPopups[editingIndex] = popupToSave
+        console.log('📝 Updating popup at index', editingIndex)
       } else {
         newPopups = [...popups, popupToSave]
+        console.log('➕ Adding new popup to array')
       }
       
+      console.log('💾 Saving to Firebase - Total popups:', newPopups.length)
+      console.log('💾 Data being saved:', { popups: newPopups })
       setPopups(newPopups)
       await saveToFirebase('firebase-popup', { popups: newPopups })
+      console.log('✅ Firebase save completed successfully!')
       setMessage('✅ המודעה נשמרה בהצלחה!')
       setTimeout(() => {
         setMessage('')
