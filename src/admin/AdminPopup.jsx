@@ -276,6 +276,7 @@ const AdminPopup = () => {
 
   // Edit View (keeping the existing form structure)
   const EditView = () => {
+    console.log('🔄 EditView rendered', { currentPopup, editingIndex })
     if (!currentPopup) return null
 
     return (
@@ -385,7 +386,10 @@ const AdminPopup = () => {
                   key="title-input"
                   type="text"
                   value={currentPopup.title}
-                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('✏️ Title changed:', e.target.value)
+                    setCurrentPopup(prev => ({ ...prev, title: e.target.value }))
+                  }}
                   className="input-field w-full"
                   placeholder="למשל: שינוי בזמני התפילות"
                 />
@@ -397,7 +401,10 @@ const AdminPopup = () => {
                   key="button-text-input"
                   type="text"
                   value={currentPopup.buttonText}
-                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('✏️ Button text changed:', e.target.value)
+                    setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))
+                  }}
                   className="input-field w-full"
                   placeholder="סגור"
                 />
@@ -460,7 +467,10 @@ const AdminPopup = () => {
                 <textarea
                   key="message-textarea"
                   value={currentPopup.message}
-                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, message: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('✏️ Message changed:', e.target.value)
+                    setCurrentPopup(prev => ({ ...prev, message: e.target.value }))
+                  }}
                   className="input-field h-40 resize-none w-full"
                   placeholder="כתוב כאן את תוכן ההודעה..."
                 ></textarea>
