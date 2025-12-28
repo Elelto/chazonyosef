@@ -302,7 +302,19 @@ const AdminGallery = () => {
       
       const updatedImages = images.filter(img => img.id !== id)
       setImages(updatedImages)
-      setMessage('✅ תמונה נמחקה בהצלחה!')
+      
+      // שמירה אוטומטית ל-Firestore
+      try {
+        await saveToFirebase('firebase-gallery', { images: updatedImages })
+        console.log('💾 מחיקה נשמרה ל-Firestore')
+        setMessage('✅ תמונה נמחקה ונשמרה בהצלחה!')
+      } catch (saveError) {
+        console.error('❌ שגיאה בשמירה אחרי מחיקה:', saveError)
+        setMessage('⚠️ התמונה נמחקה מ-Storage אבל לא מ-Firestore - לחץ "שמור שינויים"')
+        setTimeout(() => setMessage(''), 5000)
+        return
+      }
+      
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       console.error('Error deleting image:', error)
