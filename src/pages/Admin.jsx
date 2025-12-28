@@ -183,11 +183,11 @@ const Admin = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 overflow-x-hidden">
       {/* Admin Header */}
       <div className="bg-white shadow-md">
         <div className="container-custom">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 flex-wrap gap-2">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="חזון יוסף" className="h-10 w-auto" />
               <div>
@@ -206,8 +206,8 @@ const Admin = () => {
         </div>
       </div>
 
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="container-custom py-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-x-hidden">
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="card sticky top-24">

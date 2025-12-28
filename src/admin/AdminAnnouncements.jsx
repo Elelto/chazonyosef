@@ -107,7 +107,7 @@ const AdminAnnouncements = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in overflow-x-hidden max-w-full">
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -174,7 +174,7 @@ const AdminAnnouncements = () => {
                 type="text"
                 value={newAnnouncement.title}
                 onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                className="input-field"
+                className="input-field max-w-full"
                 placeholder="כותרת ההודעה"
               />
             </div>
@@ -183,7 +183,7 @@ const AdminAnnouncements = () => {
               <textarea
                 value={newAnnouncement.content}
                 onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
-                className="input-field resize-none"
+                className="input-field resize-none max-w-full"
                 rows="4"
                 placeholder="תוכן ההודעה"
               ></textarea>

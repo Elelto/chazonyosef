@@ -104,8 +104,8 @@ const AdminEvents = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="card">
+    <div className="space-y-6 animate-fade-in overflow-x-hidden max-w-full">
+      <div className="card overflow-x-hidden">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
             <Calendar className="text-primary-600" size={32} />
@@ -139,7 +139,7 @@ const AdminEvents = () => {
                 type="text"
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                className="input-field"
+                className="input-field max-w-full"
                 placeholder="שם השיעור/אירוע"
               />
             </div>
@@ -149,7 +149,7 @@ const AdminEvents = () => {
                 type="text"
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                className="input-field"
+                className="input-field max-w-full"
                 placeholder="תיאור קצר"
               />
             </div>

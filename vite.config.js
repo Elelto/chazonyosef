@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync } from 'fs'
-import { resolve } from 'path'
+import { copyFileSync, existsSync, mkdirSync } from 'fs'
+import { resolve, dirname } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -10,13 +10,23 @@ export default defineConfig({
       name: 'copy-service-worker',
       closeBundle() {
         try {
-          copyFileSync(
-            resolve(__dirname, 'public/service-worker.js'),
-            resolve(__dirname, 'dist/service-worker.js')
-          )
+          const src = resolve(__dirname, 'public/service-worker.js')
+          const dest = resolve(__dirname, 'dist/service-worker.js')
+          
+          if (!existsSync(src)) {
+            console.log('⚠️ Service Worker not found, skipping copy')
+            return
+          }
+          
+          const destDir = dirname(dest)
+          if (!existsSync(destDir)) {
+            mkdirSync(destDir, { recursive: true })
+          }
+          
+          copyFileSync(src, dest)
           console.log('✅ Service Worker copied to dist')
         } catch (err) {
-          console.error('❌ Failed to copy Service Worker:', err)
+          console.warn('⚠️ Failed to copy Service Worker:', err.message)
         }
       }
     }
