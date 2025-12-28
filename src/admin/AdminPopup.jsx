@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Bell, Save, Eye, AlertTriangle, Info, X, Upload, Trash2, Plus, Edit, List, Calendar } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase, uploadFile } from '../utils/api'
 
@@ -48,17 +48,17 @@ const AdminPopup = () => {
     }
   }
 
-  const handleCreateNew = () => {
+  const handleCreateNew = useCallback(() => {
     setCurrentPopup({ ...emptyPopup, id: Date.now().toString(), createdAt: new Date().toISOString() })
     setEditingIndex(null)
     setViewMode('edit')
-  }
+  }, [])
 
-  const handleEdit = (index) => {
+  const handleEdit = useCallback((index) => {
     setCurrentPopup({ ...popups[index] })
     setEditingIndex(index)
     setViewMode('edit')
-  }
+  }, [popups])
 
   const handleDelete = async (index) => {
     if (!confirm('האם אתה בטוח שברצונך למחוק מודעה זו?')) return
@@ -76,11 +76,11 @@ const AdminPopup = () => {
     }
   }
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setCurrentPopup(null)
     setEditingIndex(null)
     setViewMode('list')
-  }
+  }, [])
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0]
@@ -151,11 +151,11 @@ const AdminPopup = () => {
     }
   }
 
-  const generateNewId = () => {
+  const generateNewId = useCallback(() => {
     setCurrentPopup(prev => ({ ...prev, id: Date.now().toString() }))
     setMessage('🆔 נוצר מזהה חדש (המודעה תופיע מחדש לכל המשתמשים)')
     setTimeout(() => setMessage(''), 3000)
-  }
+  }, [])
 
   const getPopupStatus = (popup) => {
     if (!popup.isActive) return { text: 'לא פעילה', color: 'slate' }
@@ -382,6 +382,7 @@ const AdminPopup = () => {
               <div>
                 <label className="block text-slate-700 font-medium mb-2">כותרת</label>
                 <input
+                  key="title-input"
                   type="text"
                   value={currentPopup.title}
                   onChange={(e) => setCurrentPopup(prev => ({ ...prev, title: e.target.value }))}
@@ -393,6 +394,7 @@ const AdminPopup = () => {
               <div>
                 <label className="block text-slate-700 font-medium mb-2">טקסט הכפתור</label>
                 <input
+                  key="button-text-input"
                   type="text"
                   value={currentPopup.buttonText}
                   onChange={(e) => setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))}
@@ -406,6 +408,7 @@ const AdminPopup = () => {
                 
                 <div className="flex gap-2 mb-2">
                   <input
+                    key="action-url-input"
                     type="url"
                     value={currentPopup.actionUrl || ''}
                     onChange={(e) => setCurrentPopup(prev => ({ ...prev, actionUrl: e.target.value }))}
@@ -455,6 +458,7 @@ const AdminPopup = () => {
               <div>
                 <label className="block text-slate-700 font-medium mb-2">תוכן ההודעה</label>
                 <textarea
+                  key="message-textarea"
                   value={currentPopup.message}
                   onChange={(e) => setCurrentPopup(prev => ({ ...prev, message: e.target.value }))}
                   className="input-field h-40 resize-none w-full"
@@ -468,6 +472,7 @@ const AdminPopup = () => {
                   <div>
                     <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך התחלה</label>
                     <input
+                      key="start-date-input"
                       type="datetime-local"
                       value={currentPopup.startDate}
                       onChange={(e) => setCurrentPopup(prev => ({ ...prev, startDate: e.target.value }))}
@@ -478,6 +483,7 @@ const AdminPopup = () => {
                   <div>
                     <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך סיום</label>
                     <input
+                      key="end-date-input"
                       type="datetime-local"
                       value={currentPopup.endDate}
                       onChange={(e) => setCurrentPopup(prev => ({ ...prev, endDate: e.target.value }))}
