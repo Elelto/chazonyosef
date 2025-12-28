@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Image, Plus, Trash2, Save, Upload, Edit2, X, GripVertical, Check, Tag, Filter, Trash } from 'lucide-react'
+import { Image, Plus, Trash2, Save, Upload, Edit2, X, GripVertical, Check, Tag, Filter, Trash, RefreshCw } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 import { storage } from '../firebase'
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from 'firebase/storage'
@@ -322,6 +322,21 @@ const AdminGallery = () => {
     }
   }
 
+  const handleReload = async () => {
+    setCleaning(true)
+    setMessage('🔄 טוען מחדש...')
+    try {
+      await loadImages()
+      setMessage('✅ הגלריה נטענה מחדש!')
+      setTimeout(() => setMessage(''), 2000)
+    } catch (error) {
+      setMessage('❌ שגיאה בטעינה')
+      setTimeout(() => setMessage(''), 3000)
+    } finally {
+      setCleaning(false)
+    }
+  }
+
   const handleCleanupOrphanedFiles = async () => {
     if (!confirm('האם לחפש ולמחוק קבצים יתומים ב-Storage?\n\nקבצים יתומים = קבצים שהועלו אבל לא נשמרו ב-Firestore.')) {
       return
@@ -500,13 +515,13 @@ const AdminGallery = () => {
           </h2>
           <div className="flex gap-3">
             <button
-              onClick={handleCleanupOrphanedFiles}
+              onClick={handleReload}
               disabled={cleaning}
-              className="btn-secondary disabled:opacity-50 flex items-center gap-2"
-              title="מחק קבצים יתומים ב-Storage"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2"
+              title="טען מחדש מ-Firestore"
             >
-              <Trash size={18} />
-              {cleaning ? 'מנקה...' : 'נקה קבצים יתומים'}
+              <RefreshCw size={18} />
+              {cleaning ? 'טוען...' : 'רענן'}
             </button>
             <button
               onClick={handleSave}
