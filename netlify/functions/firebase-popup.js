@@ -30,18 +30,20 @@ export const handler = async (event, context) => {
       const doc = await docRef.get()
       
       if (doc.exists) {
-        console.log('✅ Popup settings fetched from Firebase')
+        const data = doc.data()
+        console.log('✅ Popup settings fetched from Firebase:', data)
+        // Return the entire data object to support both old (popup) and new (popups) format
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ popup: doc.data().popup })
+          body: JSON.stringify(data)
         }
       } else {
         console.log('📝 No popup settings found, returning default')
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ popup: null })
+          body: JSON.stringify({ popups: [] })
         }
       }
     }
