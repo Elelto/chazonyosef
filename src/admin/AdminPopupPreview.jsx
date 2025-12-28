@@ -20,50 +20,50 @@ const AdminPopupPreview = ({ popup, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl p-4 sm:p-6 max-h-[95vh] overflow-y-auto">
         <button 
           onClick={onClose}
-          className="absolute top-3 left-3 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+          className="absolute top-2 left-2 sm:top-3 sm:left-3 p-2 sm:p-2.5 rounded-full bg-white hover:bg-slate-100 transition-colors text-slate-700 shadow-md z-10 border border-slate-200"
         >
-          <X size={24} />
+          <X size={24} className="sm:w-6 sm:h-6" />
         </button>
         
-        <h3 className="text-2xl font-bold text-slate-800 mb-6 text-center">תצוגה מקדימה</h3>
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6 text-center pt-2">תצוגה מקדימה</h3>
         
-        <div className="flex items-center justify-center p-8 bg-slate-50 rounded-lg">
+        <div className="flex items-center justify-center p-4 sm:p-8 bg-slate-50 rounded-lg">
           <div 
-            className={`relative w-full max-w-lg p-6 bg-white rounded-xl shadow-2xl border-t-4 ${getThemeClasses()}`}
+            className={`relative w-full max-w-lg p-4 sm:p-6 bg-white rounded-xl shadow-2xl border-t-4 ${getThemeClasses()}`}
           >
             <button 
-              className="absolute top-3 left-3 p-1 rounded-full hover:bg-black/10 transition-colors text-slate-500"
+              className="absolute top-2 left-2 sm:top-3 sm:left-3 p-2 sm:p-2.5 rounded-full bg-white hover:bg-slate-100 transition-colors text-slate-700 shadow-md border border-slate-200"
             >
-              <X size={20} />
+              <X size={24} className="sm:w-5 sm:h-5" />
             </button>
 
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4 p-3 bg-white rounded-full shadow-sm">
+            <div className="flex flex-col items-center text-center pt-2">
+              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-white rounded-full shadow-sm">
                 {getIcon()}
               </div>
               
               {popup.title && (
-                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 px-2">
                   {popup.title}
                 </h3>
               )}
               
               {popup.message && (
-                <div className="text-slate-600 mb-4 whitespace-pre-wrap">
+                <div className="text-sm sm:text-base text-slate-600 mb-4 whitespace-pre-wrap px-2">
                   {popup.message}
                 </div>
               )}
 
               {popup.actionUrl && popup.actionUrl.startsWith('http') && (
-                <div className="mb-6 w-full">
+                <div className="mb-4 sm:mb-6 w-full px-2">
                   <img 
                     src={popup.actionUrl} 
                     alt={popup.title || 'תמונה'} 
-                    className="w-full max-h-96 object-contain rounded-lg shadow-md"
+                    className="w-full max-h-60 sm:max-h-80 object-contain rounded-lg shadow-md"
                     onError={(e) => {
                       e.target.style.display = 'none'
                     }}
@@ -72,7 +72,7 @@ const AdminPopupPreview = ({ popup, onClose }) => {
               )}
 
               <button
-                className={`px-6 py-2 rounded-lg text-white font-medium ${
+                className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg text-white font-medium text-sm sm:text-base min-w-[120px] ${
                   popup.type === 'warning' ? 'bg-red-500' :
                   popup.type === 'info' ? 'bg-blue-500' :
                   'bg-gold-500'
