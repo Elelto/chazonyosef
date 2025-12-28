@@ -252,27 +252,28 @@ const AdminSiteSettings = () => {
   return (
     <div className="space-y-6 overflow-x-hidden max-w-full">
       <div className="card overflow-x-hidden">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-            <Settings className="text-primary-600" size={32} />
-            הגדרות כלליות של האתר
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2 sm:gap-3">
+            <Settings className="text-primary-600" size={28} />
+            <span className="leading-tight">הגדרות כלליות של האתר</span>
           </h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {hasChanges && (
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-slate-300 hover:bg-slate-400 rounded-lg transition-colors flex items-center gap-2"
+                className="px-3 sm:px-4 py-2 bg-slate-300 hover:bg-slate-400 rounded-lg transition-colors flex items-center gap-2 text-sm sm:text-base flex-1 sm:flex-initial justify-center"
               >
-                <RotateCcw size={18} />
-                בטל שינויים
+                <RotateCcw size={16} />
+                <span className="hidden sm:inline">בטל שינויים</span>
+                <span className="sm:hidden">בטל</span>
               </button>
             )}
             <button
               onClick={handleSave}
               disabled={saving || !hasChanges}
-              className="btn-primary disabled:opacity-50 flex items-center gap-2"
+              className="btn-primary disabled:opacity-50 flex items-center gap-2 text-sm sm:text-base flex-1 sm:flex-initial justify-center"
             >
-              <Save size={18} />
+              <Save size={16} />
               {saving ? 'שומר...' : 'שמור שינויים'}
             </button>
           </div>
@@ -370,9 +371,9 @@ const AdminSiteSettings = () => {
 
         {/* Font Settings */}
         <div className="mb-8 p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Type className="text-primary-600" size={28} />
-            בחירת גופן לאתר
+          <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Type className="text-primary-600" size={24} />
+            <span className="leading-tight">בחירת גופן לאתר</span>
           </h3>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-blue-800 text-sm">
@@ -380,8 +381,8 @@ const AdminSiteSettings = () => {
             </p>
           </div>
           
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {AVAILABLE_FONTS.map((font) => (
                 <button
                   key={font.name}
@@ -390,7 +391,7 @@ const AdminSiteSettings = () => {
                     setSettings(prev => ({ ...prev, font: font.name }))
                     setHasChanges(true)
                   }}
-                  className={`p-4 rounded-lg border-2 transition-all text-right ${
+                  className={`p-3 sm:p-4 rounded-lg border-2 transition-all text-right ${
                     settings.font === font.name
                       ? 'border-primary-600 bg-primary-50 shadow-md'
                       : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
@@ -398,7 +399,7 @@ const AdminSiteSettings = () => {
                   style={{ fontFamily: font.value }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-lg">{font.name}</span>
+                    <span className="font-bold text-base sm:text-lg">{font.name}</span>
                     {settings.font === font.name && (
                       <span className="text-primary-600 text-xl">✓</span>
                     )}
@@ -414,14 +415,14 @@ const AdminSiteSettings = () => {
               ))}
             </div>
             
-            <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <h4 className="font-bold text-slate-800 mb-3">תצוגה מקדימה של הגופן הנבחר:</h4>
+            <div className="mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h4 className="font-bold text-slate-800 mb-3 text-sm sm:text-base">תצוגה מקדימה של הגופן הנבחר:</h4>
               <div 
-                className="p-6 bg-white rounded-lg border-2 border-primary-200"
+                className="p-4 sm:p-6 bg-white rounded-lg border-2 border-primary-200"
                 style={{ fontFamily: AVAILABLE_FONTS.find(f => f.name === settings.font)?.value }}
               >
-                <h1 className="text-3xl font-bold mb-3">בית המדרש "חזון יוסף"</h1>
-                <h2 className="text-2xl font-semibold mb-3">שיכון ג' בני ברק</h2>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-3">בית המדרש "חזון יוסף"</h1>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-3">שיכון ג' בני ברק</h2>
                 <p className="text-lg mb-2">
                   ברוכים הבאים לבית המדרש שלנו. כאן תוכלו למצוא מידע על זמני תפילות, שיעורים ואירועים.
                 </p>
@@ -435,16 +436,16 @@ const AdminSiteSettings = () => {
 
         {/* Color Settings */}
         <div className="mb-8 p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Palette className="text-primary-600" size={28} />
-              מערכת ניהול צבעים מתקדמת
+          <div className="flex flex-col gap-4 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Palette className="text-primary-600" size={24} />
+              <span className="leading-tight">מערכת ניהול צבעים מתקדמת</span>
             </h3>
-            <div className="flex gap-2 border-2 border-slate-300 rounded-lg p-1 bg-white">
+            <div className="flex flex-wrap gap-2 border-2 border-slate-300 rounded-lg p-1 bg-white">
               <button
                 type="button"
                 onClick={() => setShowColorSection('editor')}
-                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                className={`px-3 sm:px-4 py-2 rounded-md transition-all font-medium text-sm sm:text-base flex-1 sm:flex-initial ${
                   showColorSection === 'editor'
                     ? 'bg-primary-600 text-white shadow-md'
                     : 'text-slate-600 hover:bg-slate-100'
@@ -455,7 +456,7 @@ const AdminSiteSettings = () => {
               <button
                 type="button"
                 onClick={() => setShowColorSection('presets')}
-                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                className={`px-3 sm:px-4 py-2 rounded-md transition-all font-medium text-sm sm:text-base flex-1 sm:flex-initial ${
                   showColorSection === 'presets'
                     ? 'bg-primary-600 text-white shadow-md'
                     : 'text-slate-600 hover:bg-slate-100'
@@ -466,7 +467,7 @@ const AdminSiteSettings = () => {
               <button
                 type="button"
                 onClick={() => setShowColorSection('accessibility')}
-                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                className={`px-3 sm:px-4 py-2 rounded-md transition-all font-medium text-sm sm:text-base flex-1 sm:flex-initial ${
                   showColorSection === 'accessibility'
                     ? 'bg-primary-600 text-white shadow-md'
                     : 'text-slate-600 hover:bg-slate-100'
@@ -523,7 +524,7 @@ const AdminSiteSettings = () => {
                 {/* Combined Preview */}
                 <div className="border-2 border-primary-200 rounded-lg p-6 bg-gradient-to-br from-white to-slate-50">
                   <h4 className="text-lg font-bold text-slate-800 mb-4">תצוגה מקדימה משולבת</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-600">צבע ראשי</p>
                       <button
@@ -619,12 +620,12 @@ const AdminSiteSettings = () => {
 
         {/* Gradient Background Settings */}
         <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Palette className="text-purple-600" size={28} />
-            רקע גרדיאנט (מעבר צבעים)
+          <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Palette className="text-purple-600" size={24} />
+            <span className="leading-tight">רקע גרדיאנט (מעבר צבעים)</span>
           </h3>
           
-          <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
               <p className="text-purple-800 text-sm">
                 ✨ <strong>אפקט גרדיאנט:</strong> הוסף מעבר צבעים יפהפה לרקע האתר. השינויים יוחלו באופן מיידי!
@@ -658,7 +659,7 @@ const AdminSiteSettings = () => {
                   </h4>
                   <p className="text-sm text-slate-600 mb-4">בחר תבנית מעוצבת והחל אותה על הרקע והכפתורים בלחיצה אחת</p>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                     {GRADIENT_PRESETS.map((preset) => (
                       <button
                         key={preset.id}
@@ -695,41 +696,43 @@ const AdminSiteSettings = () => {
                   <p className="text-sm text-slate-600 mb-4">הוסף עד 4 צבעים למעבר חלק ומרשים</p>
                   
                   {(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed']).map((color, index) => (
-                    <div key={index} className="flex items-center gap-4 mb-4">
-                      <span className="text-sm font-medium text-slate-700 w-20">צבע {index + 1}</span>
-                      <input
-                        type="color"
-                        value={color}
-                        onChange={(e) => {
-                          const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
-                          newColors[index] = e.target.value
-                          updateGradient('colors', newColors)
-                        }}
-                        className="w-20 h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={color}
-                        onChange={(e) => {
-                          const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
-                          newColors[index] = e.target.value
-                          updateGradient('colors', newColors)
-                        }}
-                        className="input-field flex-1"
-                        placeholder="#1e3a8a"
-                      />
-                      {(settings.gradient?.colors || []).length > 2 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newColors = (settings.gradient?.colors || []).filter((_, i) => i !== index)
+                    <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 mb-4">
+                      <span className="text-sm font-medium text-slate-700 sm:w-20">צבע {index + 1}</span>
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="color"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
+                            newColors[index] = e.target.value
                             updateGradient('colors', newColors)
                           }}
-                          className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                        >
-                          ✕
-                        </button>
-                      )}
+                          className="w-16 sm:w-20 h-10 sm:h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...(settings.gradient?.colors || ['#1e3a8a', '#4c1d95', '#7c3aed'])]
+                            newColors[index] = e.target.value
+                            updateGradient('colors', newColors)
+                          }}
+                          className="input-field flex-1"
+                          placeholder="#1e3a8a"
+                        />
+                        {(settings.gradient?.colors || []).length > 2 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newColors = (settings.gradient?.colors || []).filter((_, i) => i !== index)
+                              updateGradient('colors', newColors)
+                            }}
+                            className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shrink-0"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   
@@ -786,12 +789,12 @@ const AdminSiteSettings = () => {
 
         {/* Button Gradient Settings */}
         <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Palette className="text-blue-600" size={28} />
-            גרדיאנט לכפתורים
+          <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Palette className="text-blue-600" size={24} />
+            <span className="leading-tight">גרדיאנט לכפתורים</span>
           </h3>
           
-          <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-blue-800 text-sm">
                 ✨ <strong>גרדיאנט לכפתורים:</strong> הוסף מעבר צבעים מיוחד לכפתורים באתר. יוחל על כל הכפתורים הראשיים.
@@ -823,41 +826,43 @@ const AdminSiteSettings = () => {
                   <p className="text-sm text-slate-600 mb-4">בחר 2-3 צבעים למעבר חלק בכפתורים</p>
                   
                   {(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed']).map((color, index) => (
-                    <div key={index} className="flex items-center gap-4 mb-4">
-                      <span className="text-sm font-medium text-slate-700 w-20">צבע {index + 1}</span>
-                      <input
-                        type="color"
-                        value={color}
-                        onChange={(e) => {
-                          const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
-                          newColors[index] = e.target.value
-                          updateButtonGradient('colors', newColors)
-                        }}
-                        className="w-20 h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={color}
-                        onChange={(e) => {
-                          const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
-                          newColors[index] = e.target.value
-                          updateButtonGradient('colors', newColors)
-                        }}
-                        className="input-field flex-1"
-                        placeholder="#4f46e5"
-                      />
-                      {(settings.buttonGradient?.colors || []).length > 2 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newColors = (settings.buttonGradient?.colors || []).filter((_, i) => i !== index)
+                    <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 mb-4">
+                      <span className="text-sm font-medium text-slate-700 sm:w-20">צבע {index + 1}</span>
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="color"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
+                            newColors[index] = e.target.value
                             updateButtonGradient('colors', newColors)
                           }}
-                          className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                        >
-                          ✕
-                        </button>
-                      )}
+                          className="w-16 sm:w-20 h-10 sm:h-12 rounded-lg border-2 border-slate-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...(settings.buttonGradient?.colors || ['#4f46e5', '#7c3aed'])]
+                            newColors[index] = e.target.value
+                            updateButtonGradient('colors', newColors)
+                          }}
+                          className="input-field flex-1"
+                          placeholder="#4f46e5"
+                        />
+                        {(settings.buttonGradient?.colors || []).length > 2 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newColors = (settings.buttonGradient?.colors || []).filter((_, i) => i !== index)
+                              updateButtonGradient('colors', newColors)
+                            }}
+                            className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shrink-0"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   
