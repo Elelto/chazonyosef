@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { Bell, Save, Eye, AlertTriangle, Info, X, Upload, Trash2, Plus, Edit, List, Calendar } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase, uploadFile } from '../utils/api'
+import AdminPopupPreview from './AdminPopupPreview'
 
 // Separate EditForm component to prevent recreation on parent re-renders
 const EditForm = memo(({ 
@@ -15,12 +16,20 @@ const EditForm = memo(({
   handleFileSelect, 
   generateNewId, 
   fileInputRef, 
-  setShowPreview 
+  setShowPreview,
+  showPreview
 }) => {
   if (!currentPopup) return null
 
   return (
-    <div className="space-y-6 overflow-x-hidden max-w-full">
+    <>
+      {showPreview && (
+        <AdminPopupPreview 
+          popup={currentPopup} 
+          onClose={() => setShowPreview(false)} 
+        />
+      )}
+      <div className="space-y-6 overflow-x-hidden max-w-full">
       <div className="card overflow-x-hidden">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
@@ -257,6 +266,7 @@ const EditForm = memo(({
         </div>
       </div>
     </div>
+    </>
   )
 })
 
@@ -572,6 +582,7 @@ const AdminPopup = () => {
           generateNewId={generateNewId}
           fileInputRef={fileInputRef}
           setShowPreview={setShowPreview}
+          showPreview={showPreview}
         />
       )}
     </>
