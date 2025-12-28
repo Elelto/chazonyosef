@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Bell, Save, Eye, AlertTriangle, Info, X, Upload, Trash2, Plus, Edit, List, Calendar } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase, uploadFile } from '../utils/api'
 
@@ -279,7 +279,7 @@ const AdminPopup = () => {
     if (!currentPopup) return null
 
     return (
-      <div className="space-y-6 animate-fade-in overflow-x-hidden max-w-full">
+      <div className="space-y-6 overflow-x-hidden max-w-full">
         <div className="card overflow-x-hidden">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
