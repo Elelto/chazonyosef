@@ -1,6 +1,264 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { Bell, Save, Eye, AlertTriangle, Info, X, Upload, Trash2, Plus, Edit, List, Calendar } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase, uploadFile } from '../utils/api'
+
+// Separate EditForm component to prevent recreation on parent re-renders
+const EditForm = memo(({ 
+  currentPopup, 
+  setCurrentPopup, 
+  editingIndex, 
+  saving, 
+  uploading, 
+  message, 
+  handleCancel, 
+  handleSave, 
+  handleFileSelect, 
+  generateNewId, 
+  fileInputRef, 
+  setShowPreview 
+}) => {
+  if (!currentPopup) return null
+
+  return (
+    <div className="space-y-6 overflow-x-hidden max-w-full">
+      <div className="card overflow-x-hidden">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+            <Bell className="text-primary-600" size={32} />
+            {editingIndex !== null ? 'עריכת מודעה' : 'מודעה חדשה'}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 flex items-center gap-2"
+            >
+              <X size={18} />
+              ביטול
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-primary disabled:opacity-50 flex items-center gap-2"
+            >
+              <Save size={18} />
+              {saving ? 'שומר...' : 'שמור'}
+            </button>
+          </div>
+        </div>
+
+        {message && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            message.includes('✅') || message.includes('🆔')
+              ? 'bg-green-50 border border-green-200 text-green-800'
+              : 'bg-red-50 border border-red-200 text-red-800'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <label className="flex items-center justify-between cursor-pointer mb-2">
+                <span className="font-bold text-slate-700">סטטוס מודעה</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={currentPopup.isActive}
+                    onChange={(e) => setCurrentPopup(prev => ({ ...prev, isActive: e.target.checked }))}
+                  />
+                  <div className={`block w-14 h-8 rounded-full transition-colors ${
+                    currentPopup.isActive ? 'bg-green-500' : 'bg-slate-300'
+                  }`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                    currentPopup.isActive ? 'transform translate-x-6' : ''
+                  }`}></div>
+                </div>
+              </label>
+              <p className="text-sm text-slate-500">
+                כשהמודעה פעילה, היא תופיע למבקרים בהתאם לתזמון שהוגדר.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">סוג מודעה</label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'default' }))}
+                  className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
+                    currentPopup.type === 'default' 
+                      ? 'border-gold-500 bg-gold-50 text-gold-700' 
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <Bell size={24} />
+                  <span className="text-sm">רגיל</span>
+                </button>
+                <button
+                  onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'warning' }))}
+                  className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
+                    currentPopup.type === 'warning' 
+                      ? 'border-red-500 bg-red-50 text-red-700' 
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <AlertTriangle size={24} />
+                  <span className="text-sm">אזהרה</span>
+                </button>
+                <button
+                  onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'info' }))}
+                  className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
+                    currentPopup.type === 'info' 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <Info size={24} />
+                  <span className="text-sm">מידע</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">כותרת</label>
+              <input
+                type="text"
+                value={currentPopup.title}
+                onChange={(e) => setCurrentPopup(prev => ({ ...prev, title: e.target.value }))}
+                className="input-field w-full"
+                placeholder="למשל: שינוי בזמני התפילות"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">טקסט הכפתור</label>
+              <input
+                type="text"
+                value={currentPopup.buttonText}
+                onChange={(e) => setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))}
+                className="input-field w-full"
+                placeholder="סגור"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">קישור לכפתור / תמונה</label>
+              
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="url"
+                  value={currentPopup.actionUrl || ''}
+                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, actionUrl: e.target.value }))}
+                  className="input-field flex-grow"
+                  placeholder="https://... או העלה קובץ"
+                  dir="ltr"
+                />
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  className="hidden"
+                />
+                
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed rounded-lg text-slate-700 flex items-center gap-2 whitespace-nowrap"
+                  title="העלה תמונה"
+                >
+                  <Upload size={18} />
+                  <span>{uploading ? 'מעלה...' : 'העלה תמונה'}</span>
+                </button>
+
+                {currentPopup.actionUrl && (
+                  <button
+                    onClick={() => setCurrentPopup(prev => ({ ...prev, actionUrl: '' }))}
+                    className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
+                    title="נקה קישור"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+              
+              <p className="text-xs text-slate-500 mt-1">
+                ניתן להדביק קישור חיצוני או להעלות תמונה (עד 5MB).
+                <br />
+                התמונה תוצג בתוך המודעה. הכפתור יפתח את הקישור/תמונה בלשונית חדשה.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">תוכן ההודעה</label>
+              <textarea
+                value={currentPopup.message}
+                onChange={(e) => setCurrentPopup(prev => ({ ...prev, message: e.target.value }))}
+                className="input-field h-40 resize-none w-full"
+                placeholder="כתוב כאן את תוכן ההודעה..."
+              ></textarea>
+            </div>
+
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <h4 className="font-bold text-purple-800 mb-3">תזמון מודעה</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך התחלה</label>
+                  <input
+                    type="datetime-local"
+                    value={currentPopup.startDate}
+                    onChange={(e) => setCurrentPopup(prev => ({ ...prev, startDate: e.target.value }))}
+                    className="input-field text-sm w-full"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">השאר ריק להצגה מיידית</p>
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך סיום</label>
+                  <input
+                    type="datetime-local"
+                    value={currentPopup.endDate}
+                    onChange={(e) => setCurrentPopup(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="input-field text-sm w-full"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">השאר ריק ללא הגבלת זמן</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <h4 className="font-bold text-blue-800 mb-2">אפשרויות מתקדמות</h4>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => setShowPreview(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <Eye size={18} />
+                  תצוגה מקדימה
+                </button>
+                
+                <div className="pt-3 border-t border-blue-200">
+                  <p className="text-xs text-blue-600 mb-2">
+                    המודעה מוצגת למשתמשים פעם אחת בלבד. אם ערכת את המודעה ואתה רוצה שהיא תופיע שוב לכולם, לחץ כאן:
+                  </p>
+                  <button 
+                    onClick={generateNewId}
+                    className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                  >
+                    אפס חשיפות (הצג מחדש לכולם)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+})
 
 const AdminPopup = () => {
   const [popups, setPopups] = useState([])
@@ -274,266 +532,6 @@ const AdminPopup = () => {
     </div>
   )
 
-  // Edit View (keeping the existing form structure)
-  const EditView = () => {
-    console.log('🔄 EditView rendered', { currentPopup, editingIndex })
-    if (!currentPopup) return null
-
-    return (
-      <div key={currentPopup.id} className="space-y-6 overflow-x-hidden max-w-full">
-        <div className="card overflow-x-hidden">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-              <Bell className="text-primary-600" size={32} />
-              {editingIndex !== null ? 'עריכת מודעה' : 'מודעה חדשה'}
-            </h2>
-            <div className="flex gap-2">
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 flex items-center gap-2"
-              >
-                <X size={18} />
-                ביטול
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="btn-primary disabled:opacity-50 flex items-center gap-2"
-              >
-                <Save size={18} />
-                {saving ? 'שומר...' : 'שמור'}
-              </button>
-            </div>
-          </div>
-
-          {message && (
-            <div className={`mb-6 p-4 rounded-lg ${
-              message.includes('✅') || message.includes('🆔')
-                ? 'bg-green-50 border border-green-200 text-green-800'
-                : 'bg-red-50 border border-red-200 text-red-800'
-            }`}>
-              {message}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <label className="flex items-center justify-between cursor-pointer mb-2">
-                  <span className="font-bold text-slate-700">סטטוס מודעה</span>
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={currentPopup.isActive}
-                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, isActive: e.target.checked }))}
-                    />
-                    <div className={`block w-14 h-8 rounded-full transition-colors ${
-                      currentPopup.isActive ? 'bg-green-500' : 'bg-slate-300'
-                    }`}></div>
-                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                      currentPopup.isActive ? 'transform translate-x-6' : ''
-                    }`}></div>
-                  </div>
-                </label>
-                <p className="text-sm text-slate-500">
-                  כשהמודעה פעילה, היא תופיע למבקרים בהתאם לתזמון שהוגדר.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-2">סוג מודעה</label>
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'default' }))}
-                    className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
-                      currentPopup.type === 'default' 
-                        ? 'border-gold-500 bg-gold-50 text-gold-700' 
-                        : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Bell size={24} />
-                    <span className="text-sm">רגיל</span>
-                  </button>
-                  <button
-                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'warning' }))}
-                    className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
-                      currentPopup.type === 'warning' 
-                        ? 'border-red-500 bg-red-50 text-red-700' 
-                        : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <AlertTriangle size={24} />
-                    <span className="text-sm">אזהרה</span>
-                  </button>
-                  <button
-                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'info' }))}
-                    className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
-                      currentPopup.type === 'info' 
-                        ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                        : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Info size={24} />
-                    <span className="text-sm">מידע</span>
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-2">כותרת</label>
-                <input
-                  key="title-input"
-                  type="text"
-                  value={currentPopup.title}
-                  onChange={(e) => {
-                    console.log('✏️ Title changed:', e.target.value)
-                    setCurrentPopup(prev => ({ ...prev, title: e.target.value }))
-                  }}
-                  className="input-field w-full"
-                  placeholder="למשל: שינוי בזמני התפילות"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-2">טקסט הכפתור</label>
-                <input
-                  key="button-text-input"
-                  type="text"
-                  value={currentPopup.buttonText}
-                  onChange={(e) => {
-                    console.log('✏️ Button text changed:', e.target.value)
-                    setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))
-                  }}
-                  className="input-field w-full"
-                  placeholder="סגור"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-2">קישור לכפתור / תמונה</label>
-                
-                <div className="flex gap-2 mb-2">
-                  <input
-                    key="action-url-input"
-                    type="url"
-                    value={currentPopup.actionUrl || ''}
-                    onChange={(e) => setCurrentPopup(prev => ({ ...prev, actionUrl: e.target.value }))}
-                    className="input-field flex-grow"
-                    placeholder="https://... או העלה קובץ"
-                    dir="ltr"
-                  />
-                  
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                    className="hidden"
-                  />
-                  
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="px-4 py-2 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed rounded-lg text-slate-700 flex items-center gap-2 whitespace-nowrap"
-                    title="העלה תמונה"
-                  >
-                    <Upload size={18} />
-                    <span>{uploading ? 'מעלה...' : 'העלה תמונה'}</span>
-                  </button>
-
-                  {currentPopup.actionUrl && (
-                    <button
-                      onClick={() => setCurrentPopup(prev => ({ ...prev, actionUrl: '' }))}
-                      className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
-                      title="נקה קישור"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  )}
-                </div>
-                
-                <p className="text-xs text-slate-500 mt-1">
-                  ניתן להדביק קישור חיצוני או להעלות תמונה (עד 5MB).
-                  <br />
-                  התמונה תוצג בתוך המודעה. הכפתור יפתח את הקישור/תמונה בלשונית חדשה.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-slate-700 font-medium mb-2">תוכן ההודעה</label>
-                <textarea
-                  key="message-textarea"
-                  value={currentPopup.message}
-                  onChange={(e) => {
-                    console.log('✏️ Message changed:', e.target.value)
-                    setCurrentPopup(prev => ({ ...prev, message: e.target.value }))
-                  }}
-                  className="input-field h-40 resize-none w-full"
-                  placeholder="כתוב כאן את תוכן ההודעה..."
-                ></textarea>
-              </div>
-
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <h4 className="font-bold text-purple-800 mb-3">תזמון מודעה</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך התחלה</label>
-                    <input
-                      key="start-date-input"
-                      type="datetime-local"
-                      value={currentPopup.startDate}
-                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, startDate: e.target.value }))}
-                      className="input-field text-sm w-full"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">השאר ריק להצגה מיידית</p>
-                  </div>
-                  <div>
-                    <label className="block text-slate-700 font-medium mb-2 text-sm">תאריך סיום</label>
-                    <input
-                      key="end-date-input"
-                      type="datetime-local"
-                      value={currentPopup.endDate}
-                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, endDate: e.target.value }))}
-                      className="input-field text-sm w-full"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">השאר ריק ללא הגבלת זמן</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <h4 className="font-bold text-blue-800 mb-2">אפשרויות מתקדמות</h4>
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => setShowPreview(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2 bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
-                  >
-                    <Eye size={18} />
-                    תצוגה מקדימה
-                  </button>
-                  
-                  <div className="pt-3 border-t border-blue-200">
-                    <p className="text-xs text-blue-600 mb-2">
-                      המודעה מוצגת למשתמשים פעם אחת בלבד. אם ערכת את המודעה ואתה רוצה שהיא תופיע שוב לכולם, לחץ כאן:
-                    </p>
-                    <button 
-                      onClick={generateNewId}
-                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
-                    >
-                      אפס חשיפות (הצג מחדש לכולם)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   if (loading) {
     return (
@@ -549,7 +547,22 @@ const AdminPopup = () => {
   return (
     <>
       {viewMode === 'list' && <ListView />}
-      {viewMode === 'edit' && currentPopup && <EditView key={`edit-${currentPopup.id}`} />}
+      {viewMode === 'edit' && currentPopup && (
+        <EditForm
+          currentPopup={currentPopup}
+          setCurrentPopup={setCurrentPopup}
+          editingIndex={editingIndex}
+          saving={saving}
+          uploading={uploading}
+          message={message}
+          handleCancel={handleCancel}
+          handleSave={handleSave}
+          handleFileSelect={handleFileSelect}
+          generateNewId={generateNewId}
+          fileInputRef={fileInputRef}
+          setShowPreview={setShowPreview}
+        />
+      )}
     </>
   )
 }
