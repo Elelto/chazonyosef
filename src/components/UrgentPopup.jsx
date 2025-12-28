@@ -13,21 +13,40 @@ const UrgentPopup = () => {
 
   const loadPopup = async () => {
     try {
+      console.log('🎯 UrgentPopup: Loading popup...')
       const sessionHidden = sessionStorage.getItem('popupHidden')
+      console.log('📦 Session hidden status:', sessionHidden)
+      
       const data = await fetchFromFirebase('firebase-popup')
+      console.log('📥 Received popup data:', data)
       
       // Handle both old format (single popup) and new format (array of popups)
       let popups = []
       if (data && data.popups) {
         popups = data.popups
+        console.log('✅ Found popups array:', popups.length, 'items')
       } else if (data && data.popup) {
         popups = [data.popup]
+        console.log('✅ Found single popup, converted to array')
+      } else {
+        console.log('⚠️ No popup data found')
       }
       
       // Filter active popups that are within date range
       const now = new Date()
+      console.log('🕐 Current time:', now.toISOString())
+      
       const activePopups = popups.filter(p => {
-        if (!p.isActive) return false
+        console.log('🔍 Checking popup:', p.id, {
+          isActive: p.isActive,
+          startDate: p.startDate,
+          endDate: p.endDate
+        })
+        
+        if (!p.isActive) {
+          console.log('❌ Popup not active:', p.id)
+          return false
+        }
         
         const startDate = p.startDate ? new Date(p.startDate) : null
         const endDate = p.endDate ? new Date(p.endDate) : null
@@ -36,10 +55,17 @@ const UrgentPopup = () => {
           (!startDate || now >= startDate) && 
           (!endDate || now <= endDate)
         
+        console.log('📅 Date range check for', p.id, ':', isWithinDateRange)
+        
         return isWithinDateRange
       })
       
-      if (activePopups.length === 0) return
+      console.log('✅ Active popups after filtering:', activePopups.length)
+      
+      if (activePopups.length === 0) {
+        console.log('⚠️ No active popups to display')
+        return
+      }
       
       // Get the most recent active popup (by createdAt or updatedAt)
       const currentPopup = activePopups.sort((a, b) => {
@@ -48,22 +74,32 @@ const UrgentPopup = () => {
         return dateB - dateA
       })[0]
       
+      console.log('🎯 Selected popup to show:', currentPopup.id, currentPopup.title)
+      
       // Check if we should show it based on ID and session
       const lastSeenId = localStorage.getItem('lastSeenPopupId')
       const isNewPopup = currentPopup.id !== lastSeenId
       
+      console.log('🔍 Last seen popup ID:', lastSeenId)
+      console.log('🆕 Is new popup:', isNewPopup)
+      
       if (isNewPopup) {
         sessionStorage.removeItem('popupHidden')
+        console.log('🔄 Cleared session hidden status for new popup')
       }
       
       const shouldShow = isNewPopup || !sessionHidden
+      console.log('👁️ Should show popup:', shouldShow)
       
       if (shouldShow) {
         setPopup(currentPopup)
+        console.log('✅ Popup set, will show in 1 second')
         setTimeout(() => setIsVisible(true), 1000)
+      } else {
+        console.log('❌ Popup not shown - already seen in this session')
       }
     } catch (error) {
-      console.error('Error loading popup:', error)
+      console.error('❌ Error loading popup:', error)
     } finally {
       setLoading(false)
     }
