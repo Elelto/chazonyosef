@@ -325,7 +325,7 @@ const AdminPopup = () => {
                       type="checkbox"
                       className="sr-only"
                       checked={currentPopup.isActive}
-                      onChange={(e) => setCurrentPopup({ ...currentPopup, isActive: e.target.checked })}
+                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, isActive: e.target.checked }))}
                     />
                     <div className={`block w-14 h-8 rounded-full transition-colors ${
                       currentPopup.isActive ? 'bg-green-500' : 'bg-slate-300'
@@ -344,7 +344,7 @@ const AdminPopup = () => {
                 <label className="block text-slate-700 font-medium mb-2">סוג מודעה</label>
                 <div className="grid grid-cols-3 gap-3">
                   <button
-                    onClick={() => setCurrentPopup({ ...currentPopup, type: 'default' })}
+                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'default' }))}
                     className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
                       currentPopup.type === 'default' 
                         ? 'border-gold-500 bg-gold-50 text-gold-700' 
@@ -355,7 +355,7 @@ const AdminPopup = () => {
                     <span className="text-sm">רגיל</span>
                   </button>
                   <button
-                    onClick={() => setCurrentPopup({ ...currentPopup, type: 'warning' })}
+                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'warning' }))}
                     className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
                       currentPopup.type === 'warning' 
                         ? 'border-red-500 bg-red-50 text-red-700' 
@@ -366,7 +366,7 @@ const AdminPopup = () => {
                     <span className="text-sm">אזהרה</span>
                   </button>
                   <button
-                    onClick={() => setCurrentPopup({ ...currentPopup, type: 'info' })}
+                    onClick={() => setCurrentPopup(prev => ({ ...prev, type: 'info' }))}
                     className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${
                       currentPopup.type === 'info' 
                         ? 'border-blue-500 bg-blue-50 text-blue-700' 
@@ -384,8 +384,8 @@ const AdminPopup = () => {
                 <input
                   type="text"
                   value={currentPopup.title}
-                  onChange={(e) => setCurrentPopup({ ...currentPopup, title: e.target.value })}
-                  className="input-field"
+                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, title: e.target.value }))}
+                  className="input-field w-full"
                   placeholder="למשל: שינוי בזמני התפילות"
                 />
               </div>
@@ -395,8 +395,8 @@ const AdminPopup = () => {
                 <input
                   type="text"
                   value={currentPopup.buttonText}
-                  onChange={(e) => setCurrentPopup({ ...currentPopup, buttonText: e.target.value })}
-                  className="input-field"
+                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, buttonText: e.target.value }))}
+                  className="input-field w-full"
                   placeholder="סגור"
                 />
               </div>
@@ -408,7 +408,7 @@ const AdminPopup = () => {
                   <input
                     type="url"
                     value={currentPopup.actionUrl || ''}
-                    onChange={(e) => setCurrentPopup({ ...currentPopup, actionUrl: e.target.value })}
+                    onChange={(e) => setCurrentPopup(prev => ({ ...prev, actionUrl: e.target.value }))}
                     className="input-field flex-grow"
                     placeholder="https://... או העלה קובץ"
                     dir="ltr"
@@ -434,7 +434,7 @@ const AdminPopup = () => {
 
                   {currentPopup.actionUrl && (
                     <button
-                      onClick={() => setCurrentPopup({ ...currentPopup, actionUrl: '' })}
+                      onClick={() => setCurrentPopup(prev => ({ ...prev, actionUrl: '' }))}
                       className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
                       title="נקה קישור"
                     >
@@ -456,8 +456,8 @@ const AdminPopup = () => {
                 <label className="block text-slate-700 font-medium mb-2">תוכן ההודעה</label>
                 <textarea
                   value={currentPopup.message}
-                  onChange={(e) => setCurrentPopup({ ...currentPopup, message: e.target.value })}
-                  className="input-field h-40 resize-none"
+                  onChange={(e) => setCurrentPopup(prev => ({ ...prev, message: e.target.value }))}
+                  className="input-field h-40 resize-none w-full"
                   placeholder="כתוב כאן את תוכן ההודעה..."
                 ></textarea>
               </div>
@@ -470,8 +470,8 @@ const AdminPopup = () => {
                     <input
                       type="datetime-local"
                       value={currentPopup.startDate}
-                      onChange={(e) => setCurrentPopup({ ...currentPopup, startDate: e.target.value })}
-                      className="input-field text-sm"
+                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, startDate: e.target.value }))}
+                      className="input-field text-sm w-full"
                     />
                     <p className="text-xs text-slate-500 mt-1">השאר ריק להצגה מיידית</p>
                   </div>
@@ -480,8 +480,8 @@ const AdminPopup = () => {
                     <input
                       type="datetime-local"
                       value={currentPopup.endDate}
-                      onChange={(e) => setCurrentPopup({ ...currentPopup, endDate: e.target.value })}
-                      className="input-field text-sm"
+                      onChange={(e) => setCurrentPopup(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="input-field text-sm w-full"
                     />
                     <p className="text-xs text-slate-500 mt-1">השאר ריק ללא הגבלת זמן</p>
                   </div>
