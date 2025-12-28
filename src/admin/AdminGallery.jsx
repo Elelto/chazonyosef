@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Image, Plus, Trash2, Save, Upload, Edit2, X, GripVertical, Check, Tag, Filter, Trash, RefreshCw } from 'lucide-react'
 import { fetchFromFirebase, saveToFirebase } from '../utils/api'
 import { storage } from '../firebase'
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from 'firebase/storage'
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll, getMetadata } from 'firebase/storage'
 import imageCompression from 'browser-image-compression'
 
 const CATEGORIES = ['אירועים', 'בית המדרש', 'שיעורים', 'חגים', 'פעילויות', 'אחר']
@@ -303,11 +303,55 @@ const AdminGallery = () => {
       const updatedImages = images.filter(img => img.id !== id)
       setImages(updatedImages)
       
+      // בדוק ונקה רשומות שבורות אוטומטית
+      const brokenImages = []
+      for (const image of updatedImages) {
+        let isBroken = false
+        
+        if (image.storagePaths) {
+          try {
+            const thumbRef = ref(storage, image.storagePaths.thumb)
+            await getMetadata(thumbRef)
+          } catch (err) {
+            isBroken = true
+          }
+        } else if (image.storagePath) {
+          try {
+            const fileRef = ref(storage, image.storagePath)
+            await getMetadata(fileRef)
+          } catch (err) {
+            isBroken = true
+          }
+        } else {
+          isBroken = true
+        }
+        
+        if (isBroken) {
+          brokenImages.push(image)
+        }
+      }
+      
+      // אם נמצאו רשומות שבורות, נקה אותן
+      let finalImages = updatedImages
+      if (brokenImages.length > 0) {
+        console.log(`🧹 נמצאו ${brokenImages.length} רשומות שבורות נוספות, מנקה...`)
+        finalImages = updatedImages.filter(img => 
+          !brokenImages.find(broken => broken.id === img.id)
+        )
+        setImages(finalImages)
+      }
+      
       // שמירה אוטומטית ל-Firestore
       try {
-        await saveToFirebase('firebase-gallery', { images: updatedImages })
+        await saveToFirebase('firebase-gallery', { images: finalImages })
+        localStorage.setItem('gallery', JSON.stringify(finalImages))
         console.log('💾 מחיקה נשמרה ל-Firestore')
-        setMessage('✅ תמונה נמחקה ונשמרה בהצלחה!')
+        
+        if (brokenImages.length > 0) {
+          setMessage(`✅ תמונה נמחקה + ${brokenImages.length} רשומות שבורות נוקו!`)
+        } else {
+          setMessage('✅ תמונה נמחקה ונשמרה בהצלחה!')
+        }
       } catch (saveError) {
         console.error('❌ שגיאה בשמירה אחרי מחיקה:', saveError)
         setMessage('⚠️ התמונה נמחקה מ-Storage אבל לא מ-Firestore - לחץ "שמור שינויים"')
@@ -331,6 +375,93 @@ const AdminGallery = () => {
       setTimeout(() => setMessage(''), 2000)
     } catch (error) {
       setMessage('❌ שגיאה בטעינה')
+      setTimeout(() => setMessage(''), 3000)
+    } finally {
+      setCleaning(false)
+    }
+  }
+
+  const handleCleanupBrokenRecords = async () => {
+    if (!confirm('האם למחוק רשומות שבורות?\n\nזה יבדוק כל תמונה אם הקבצים שלה קיימים ב-Storage, וימחק רשומות של תמונות שהקבצים נמחקו.')) {
+      return
+    }
+
+    setCleaning(true)
+    setMessage('🔍 בודק תמונות ב-Storage...')
+
+    try {
+      const brokenImages = []
+      let checkedCount = 0
+      
+      for (const image of images) {
+        checkedCount++
+        setMessage(`🔍 בודק תמונה ${checkedCount}/${images.length}...`)
+        
+        let isBroken = false
+        
+        // בדוק אם הקבצים קיימים ב-Storage
+        if (image.storagePaths) {
+          // תמונות חדשות עם 3 גרסאות
+          try {
+            const thumbRef = ref(storage, image.storagePaths.thumb)
+            await getMetadata(thumbRef)
+          } catch (err) {
+            console.log(`❌ תמונה ${image.id} - קובץ לא קיים:`, err.code)
+            isBroken = true
+          }
+        } else if (image.storagePath) {
+          // תמונות ישנות
+          try {
+            const fileRef = ref(storage, image.storagePath)
+            await getMetadata(fileRef)
+          } catch (err) {
+            console.log(`❌ תמונה ${image.id} - קובץ לא קיים:`, err.code)
+            isBroken = true
+          }
+        } else {
+          // אין נתיב בכלל
+          console.log(`❌ תמונה ${image.id} - אין נתיב storage`)
+          isBroken = true
+        }
+        
+        if (isBroken) {
+          brokenImages.push(image)
+        }
+      }
+
+      if (brokenImages.length === 0) {
+        setMessage('✅ לא נמצאו רשומות שבורות! כל התמונות תקינות.')
+        setTimeout(() => setMessage(''), 3000)
+        setCleaning(false)
+        return
+      }
+
+      setMessage(`🗑️ נמצאו ${brokenImages.length} רשומות שבורות, מוחק...`)
+      
+      // מחק רשומות שבורות
+      const cleanedImages = images.filter(img => 
+        !brokenImages.find(broken => broken.id === img.id)
+      )
+      
+      setImages(cleanedImages)
+      
+      // שמור ל-Firestore
+      try {
+        await saveToFirebase('firebase-gallery', { images: cleanedImages })
+        localStorage.setItem('gallery', JSON.stringify(cleanedImages))
+        console.log('💾 רשומות שבורות נמחקו ונשמרו ל-Firestore')
+        setMessage(`✅ נמחקו ${brokenImages.length} רשומות שבורות בהצלחה!`)
+      } catch (saveError) {
+        console.error('❌ שגיאה בשמירה:', saveError)
+        setMessage('⚠️ הרשומות נמחקו מהזיכרון אבל לא נשמרו - לחץ "שמור שינויים"')
+        setTimeout(() => setMessage(''), 5000)
+        return
+      }
+      
+      setTimeout(() => setMessage(''), 5000)
+    } catch (error) {
+      console.error('Error cleaning broken records:', error)
+      setMessage('❌ שגיאה בניקוי רשומות שבורות')
       setTimeout(() => setMessage(''), 3000)
     } finally {
       setCleaning(false)
@@ -514,6 +645,15 @@ const AdminGallery = () => {
             ניהול גלריה
           </h2>
           <div className="flex gap-3">
+            <button
+              onClick={handleCleanupBrokenRecords}
+              disabled={cleaning}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2"
+              title="מחק רשומות שבורות"
+            >
+              <Trash size={18} />
+              {cleaning ? 'בודק...' : 'נקה שבורות'}
+            </button>
             <button
               onClick={handleReload}
               disabled={cleaning}
